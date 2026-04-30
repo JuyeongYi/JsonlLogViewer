@@ -9,7 +9,6 @@ export interface LogRow {
 }
 
 export interface FilterState {
-  text: string           // _raw 전체 텍스트 검색
   levels: string[]       // 선택된 레벨 목록 (빈 배열 = 전체)
   sortOrder: 'asc' | 'desc'  // timestamp 기준 정렬
   msgRegex: string       // msg 필드 정규식 필터 (빈 문자열 = 비활성)

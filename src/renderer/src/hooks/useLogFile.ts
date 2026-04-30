@@ -17,13 +17,7 @@ function applyFilter(rows: LogRow[], filter: FilterState): LogRow[] {
     ? rows
     : rows.filter(row => filter.levels.includes(String(row.level ?? '').toLowerCase()))
 
-  // 2. Text filter (_raw)
-  if (filter.text) {
-    const text = filter.text.toLowerCase()
-    result = result.filter(row => row._raw.toLowerCase().includes(text))
-  }
-
-  // 3. Msg regex filter
+  // 2. Msg regex filter
   if (filter.msgRegex) {
     try {
       const re = new RegExp(filter.msgRegex)
@@ -46,7 +40,7 @@ export function useLogFile() {
     path: null,
     rows: [],
     filteredRows: [],
-    filter: { text: '', levels: [], sortOrder: 'asc', msgRegex: '' },
+    filter: { levels: [], sortOrder: 'asc', msgRegex: '' },
     isLoading: false,
     error: null,
   })
