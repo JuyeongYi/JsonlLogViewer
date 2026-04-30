@@ -107,23 +107,23 @@ window.addEventListener('message', e => {
 
   // 배열 필드
   for (const [k, v] of arrays) {
-    const arr = v as unknown[]
+    const arr = v
     if (!arr.length) continue
 
     // 문자열 배열은 태그로 표시
     if (typeof arr[0] === 'string') {
       sections += `<div class="section">
         <div class="section-title">${k}</div>
-        <div>${renderStringArray(arr as string[])}</div>
+        <div>${renderStringArray(arr)}</div>
       </div>`
       continue
     }
 
     // 객체 배열은 테이블
     const isPerf = k === 'metrics'
-    const table = renderTable(arr as Record<string,unknown>[], isPerf ? (col, val, row) => {
+    const table = renderTable(arr, isPerf ? (col, val, row) => {
       if (col === 'ms' && row.budget_ms) {
-        const over = (val as number) > (row.budget_ms as number)
+        const over = val > row.budget_ms
         return over
           ? `<span class="badge-over">예산 초과</span>`
           : `<span class="badge-ok">정상</span>`
