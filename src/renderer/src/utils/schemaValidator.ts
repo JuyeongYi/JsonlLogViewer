@@ -178,11 +178,20 @@ export function findMatchingSchema(
     const url = row['$schema']
     const stem = extractStem(url)
 
-    // 1. 로컬 등록 스키마 확인 (schema.json + viewer.html 모두 활용)
+    // 1. 로컬 등록 스키마 확인 (stem 매칭)
     const local = schemas.find(s => s.id === stem)
     if (local) {
-      const matched = tryEntry(local)
-      if (matched) return matched
+      if (local.hasSchema) {
+        // schema.json 있음 → 검증 후 반환 (viewer도 있으면 연결)
+        const matched = tryEntry(local)
+        if (matched) return matched
+      } else {
+        // viewer-only: stem 매칭만으로 반환, 검증은 원격 schema로
+        // 원격 schema fetch 트리거 (있으면 다음 렌더에서 검증)
+        const cached = remoteSchemaCache.get(url)
+        if (!cached) fetchRemoteSchema(url)
+        return local  // viewer 바로 연결
+      }
     }
 
     // 2. 로컬 없음 → 원격 캐시 확인 또는 fetch 트리거

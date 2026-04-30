@@ -53,7 +53,8 @@ declare global {
 export interface SchemaEntry {
   id: string               // 디렉토리 이름 (예: "game-event")
   displayName: string      // config.json의 name 필드
-  schema: Record<string, unknown>  // JSON Schema 객체
+  schema: Record<string, unknown>  // JSON Schema 객체 ({} if no schema.json)
+  hasSchema: boolean       // schema.json 존재 여부
   hasViewer: boolean       // viewer.html 존재 여부
   viewerPath: string | null // viewer.html 절대 경로
 }

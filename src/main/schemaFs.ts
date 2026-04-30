@@ -5,6 +5,7 @@ import AdmZip from 'adm-zip'
 export interface SchemaSummary {
   id: string
   displayName: string
+  hasSchema: boolean
   hasViewer: boolean
 }
 
@@ -24,7 +25,10 @@ export function listSchemas(dir: string = getSchemasDir()): SchemaSummary[] {
     .filter(d => d.isDirectory())
     .flatMap(d => {
       const entryDir = join(dir, d.name)
-      if (!existsSync(join(entryDir, 'schema.json'))) return []
+      const hasSchema = existsSync(join(entryDir, 'schema.json'))
+      const hasViewer = existsSync(join(entryDir, 'viewer.html'))
+      const hasConfig = existsSync(join(entryDir, 'config.json'))
+      if (!hasSchema && !hasViewer && !hasConfig) return []
       let displayName = d.name
       try {
         const cfg = JSON.parse(readFileSync(join(entryDir, 'config.json'), 'utf-8'))
@@ -33,7 +37,8 @@ export function listSchemas(dir: string = getSchemasDir()): SchemaSummary[] {
       return [{
         id: d.name,
         displayName,
-        hasViewer: existsSync(join(entryDir, 'viewer.html')),
+        hasSchema,
+        hasViewer,
       }]
     })
 }

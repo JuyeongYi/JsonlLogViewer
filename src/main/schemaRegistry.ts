@@ -34,21 +34,28 @@ export function loadSchemas(dir?: string): SchemaEntry[] {
       const configPath = join(entryDir, 'config.json')
       const viewerPath = join(entryDir, 'viewer.html')
 
-      if (!existsSync(schemaPath)) return []
+      const hasSchemaFile = existsSync(schemaPath)
+      const hasViewerFile = existsSync(viewerPath)
+      const hasConfigFile = existsSync(configPath)
+
+      // schema.json, viewer.html, config.json 중 하나도 없으면 건너뜀
+      if (!hasSchemaFile && !hasViewerFile && !hasConfigFile) return []
 
       try {
-        const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'))
-        const config = existsSync(configPath)
+        const schema = hasSchemaFile
+          ? JSON.parse(readFileSync(schemaPath, 'utf-8'))
+          : {}
+        const config = hasConfigFile
           ? JSON.parse(readFileSync(configPath, 'utf-8'))
           : {}
-        const hasViewer = existsSync(viewerPath)
 
         return [{
           id: d.name,
           displayName: config.name ?? d.name,
           schema,
-          hasViewer,
-          viewerPath: hasViewer ? viewerPath : null,
+          hasSchema: hasSchemaFile,
+          hasViewer: hasViewerFile,
+          viewerPath: hasViewerFile ? viewerPath : null,
         } satisfies SchemaEntry]
       } catch {
         return []
