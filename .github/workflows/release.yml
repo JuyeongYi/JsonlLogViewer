@@ -1,14 +1,15 @@
 name: Release
 
-# v*.*.* 태그 푸시 시 자동 실행
-# 사용법: git tag v1.0.0 && git push origin v1.0.0
 on:
   push:
     tags:
       - 'v*.*.*'
 
 permissions:
-  contents: write   # GitHub Release 생성에 필요
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Node.js 20 deprecation 대응
 
 jobs:
   build-windows:
@@ -21,30 +22,31 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run tests
-        run: npm test
+        run: npx vitest run
 
       - name: Build app
         run: npm run build
 
-      - name: Package installer (Windows NSIS)
-        run: npx electron-builder --win
+      - name: Package installer
+        run: npx electron-builder --win --publish never
         env:
-          # 코드 서명 비활성화 (winCodeSign 심볼릭 링크 문제 우회)
-          # GitHub Actions Windows 러너는 심볼릭 링크를 지원하므로
-          # 실제로는 winCodeSign이 정상 작동할 수 있음 — 이슈 발생 시 제거
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: List dist output
+        run: Get-ChildItem dist -Recurse -Filter "*.exe" | Select-Object FullName, Length
+        shell: pwsh
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*-setup.exe
-          generate_release_notes: true   # 커밋 기반 릴리즈 노트 자동 생성
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

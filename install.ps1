@@ -57,7 +57,10 @@ function Ensure-WinCodeSign {
     $url = "https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-$ver/winCodeSign-$ver.7z"
     $tmp = "$env:TEMP\winCodeSign-$ver.7z"
 
-    Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing
+    # Invoke-WebRequest의 progress bar가 속도를 크게 저하시키므로 비활성화
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing -TimeoutSec 120
+    $ProgressPreference = 'Continue'
 
     # -snl: 심볼릭 링크 건너뜀 (macOS 전용, Windows 빌드에 불필요)
     & $7za x -snl -bd $tmp "-o$cacheDir" | Out-Null
