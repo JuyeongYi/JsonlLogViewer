@@ -33,6 +33,10 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
         if (e.key === '[') { e.preventDefault(); handlers.onPrevTab() }
         if (e.key === '}') { e.preventDefault(); handlers.onNextView() }
         if (e.key === '{') { e.preventDefault(); handlers.onPrevView() }
+        if (e.key === 'q') { e.preventDefault(); handlers.onToggleError() }
+        if (e.key === 'w') { e.preventDefault(); handlers.onToggleWarn() }
+        if (e.key === 'e') { e.preventDefault(); handlers.onToggleInfo() }
+        if (e.key === 'r') { e.preventDefault(); handlers.onToggleDebug() }
         if (e.key === 't') { e.preventDefault(); handlers.onToggleSort() }
         if (e.key === 'i' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchMsg() }
         if (e.key === 'u' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchCategory() }
@@ -43,10 +47,6 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
       if (ctrl && e.key === 'i') { e.preventDefault(); handlers.onClearMsg() }
       if (ctrl && e.key === 'u') { e.preventDefault(); handlers.onClearCategory() }
 
-      if (ctrl && e.key === 'q') { e.preventDefault(); handlers.onToggleError() }
-      if (ctrl && e.key === 'w') { e.preventDefault(); handlers.onToggleWarn() }
-      if (ctrl && e.key === 'e') { e.preventDefault(); handlers.onToggleInfo() }
-      if (ctrl && e.key === 'r') { e.preventDefault(); handlers.onToggleDebug() }
       if (ctrl && e.key === 'o') { e.preventDefault(); handlers.onOpenFile() }
     }
     window.addEventListener('keydown', handle)
