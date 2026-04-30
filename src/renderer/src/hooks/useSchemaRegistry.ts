@@ -27,5 +27,19 @@ export function useSchemaRegistry() {
     await reload()
   }, [reload])
 
-  return { schemas, saveSchema, deleteSchema, reload }
+  const reorderSchemas = useCallback(async (newOrder: string[]) => {
+    await window.schemaApi.saveOrder(newOrder)
+    clearValidatorCache()
+    clearViewerCache()
+    setSchemas(prev => {
+      const orderMap = new Map(newOrder.map((id, i) => [id, i]))
+      return [...prev].sort((a, b) => {
+        const ai = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity
+        const bi = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity
+        return ai - bi
+      })
+    })
+  }, [])
+
+  return { schemas, saveSchema, deleteSchema, reload, reorderSchemas }
 }

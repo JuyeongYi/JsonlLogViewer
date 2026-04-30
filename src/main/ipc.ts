@@ -1,7 +1,7 @@
 import { ipcMain, dialog } from 'electron'
-import { readFileSync, mkdirSync, writeFileSync, rmSync, promises as fsPromises } from 'fs'
+import { readFileSync, mkdirSync, writeFileSync, rmSync, existsSync, promises as fsPromises } from 'fs'
 import { join } from 'path'
-import { loadSchemas, getSchemaDir } from './schemaRegistry'
+import { loadSchemas, getSchemaDir, saveSchemaOrder } from './schemaRegistry'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('file:open', async () => {
@@ -48,6 +48,57 @@ export function registerIpcHandlers(): void {
       return { html: readFileSync(viewerPath, 'utf-8') }
     } catch {
       return { html: null, error: 'viewer.html 읽기 실패' }
+    }
+  })
+
+  ipcMain.handle('schema:saveOrder', (_event, order: string[]) => {
+    saveSchemaOrder(order)
+    return { ok: true }
+  })
+
+  ipcMain.handle('schema:export', async () => {
+    const schemas = loadSchemas()
+    const data = schemas.map(s => {
+      const dir = join(getSchemaDir(), s.id)
+      const viewerPath = join(dir, 'viewer.html')
+      return {
+        id: s.id,
+        displayName: s.displayName,
+        schema: s.schema,
+        viewerHtml: existsSync(viewerPath) ? readFileSync(viewerPath, 'utf-8') : null,
+      }
+    })
+    const { filePath, canceled } = await dialog.showSaveDialog({
+      defaultPath: 'schemas-export.json',
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    })
+    if (canceled || !filePath) return { ok: false }
+    writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
+    return { ok: true, count: data.length }
+  })
+
+  ipcMain.handle('schema:import', async () => {
+    const { filePaths, canceled } = await dialog.showOpenDialog({
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+      properties: ['openFile'],
+    })
+    if (canceled || !filePaths[0]) return { ok: false, count: 0 }
+    try {
+      const raw = readFileSync(filePaths[0], 'utf-8')
+      const entries = JSON.parse(raw)
+      let count = 0
+      for (const entry of entries) {
+        if (!entry.id || !entry.schema) continue
+        const dir = join(getSchemaDir(), entry.id)
+        mkdirSync(dir, { recursive: true })
+        writeFileSync(join(dir, 'schema.json'), JSON.stringify(entry.schema), 'utf-8')
+        writeFileSync(join(dir, 'config.json'), JSON.stringify({ name: entry.displayName ?? entry.id }), 'utf-8')
+        if (entry.viewerHtml) writeFileSync(join(dir, 'viewer.html'), entry.viewerHtml, 'utf-8')
+        count++
+      }
+      return { ok: true, count }
+    } catch (e) {
+      return { ok: false, error: String(e), count: 0 }
     }
   })
 }

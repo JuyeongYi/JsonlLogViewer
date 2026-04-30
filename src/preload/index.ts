@@ -13,4 +13,7 @@ contextBridge.exposeInMainWorld('schemaApi', {
     ipcRenderer.invoke('schema:save', id, schemaJson, configJson, viewerHtml),
   delete: (id: string) => ipcRenderer.invoke('schema:delete', id),
   readViewer: (viewerPath: string) => ipcRenderer.invoke('schema:readViewer', viewerPath),
+  saveOrder: (order: string[]) => ipcRenderer.invoke('schema:saveOrder', order),
+  exportSchemas: () => ipcRenderer.invoke('schema:export'),
+  importSchemas: () => ipcRenderer.invoke('schema:import'),
 })

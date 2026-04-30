@@ -9,8 +9,8 @@ import { Sidebar } from './components/Sidebar'
 import { SchemaManagement } from './components/SchemaManagement'
 
 export default function App(): React.ReactElement {
-  const { path, rows, filteredRows, filter, isLoading, error, openFile, setFilter, resetFallbackSchemaIds } = useLogFile()
-  const { schemas, saveSchema, deleteSchema } = useSchemaRegistry()
+  const { path, rows, filteredRows, filter, isLoading, error, openFile, setFilter, resetFallbackSchemaIds, resetAllSchemaCache } = useLogFile()
+  const { schemas, saveSchema, deleteSchema, reorderSchemas, reload: reloadSchemas } = useSchemaRegistry()
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [showSchemaManagement, setShowSchemaManagement] = useState(false)
   const [editTarget, setEditTarget] = useState<import('./types').SchemaEntry | undefined>(undefined)
@@ -30,6 +30,23 @@ export default function App(): React.ReactElement {
     await deleteSchema(id)
     resetFallbackSchemaIds(id)
   }, [deleteSchema, resetFallbackSchemaIds])
+
+  const handleReorderSchemas = useCallback(async (newOrder: string[]) => {
+    await reorderSchemas(newOrder)
+    resetAllSchemaCache()
+  }, [reorderSchemas, resetAllSchemaCache])
+
+  const handleExportSchemas = useCallback(async () => {
+    await window.schemaApi.exportSchemas()
+  }, [])
+
+  const handleImportSchemas = useCallback(async () => {
+    const result = await window.schemaApi.importSchemas()
+    if (result.ok) {
+      await reloadSchemas()
+      resetAllSchemaCache()
+    }
+  }, [reloadSchemas, resetAllSchemaCache])
 
   const selectedRow = selectedIndex !== null ? filteredRows[selectedIndex] ?? null : null
 
@@ -64,6 +81,7 @@ export default function App(): React.ReactElement {
           onOpenSchemaManagement={() => { setEditTarget(undefined); setShowSchemaManagement(true) }}
           onEditSchema={s => { setEditTarget(s); setShowSchemaManagement(true) }}
           onDeleteSchema={handleDeleteSchema}
+          onReorder={handleReorderSchemas}
         />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
@@ -89,6 +107,8 @@ export default function App(): React.ReactElement {
           onDelete={handleDeleteSchema}
           onClose={() => { setShowSchemaManagement(false); setEditTarget(undefined) }}
           editTarget={editTarget}
+          onExport={handleExportSchemas}
+          onImport={handleImportSchemas}
         />
       )}
     </div>

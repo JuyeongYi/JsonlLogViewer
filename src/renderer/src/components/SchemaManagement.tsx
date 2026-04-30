@@ -7,12 +7,15 @@ interface SchemaManagementProps {
   onDelete: (id: string) => Promise<void>
   onClose: () => void
   editTarget?: SchemaEntry  // 편집 모드: 해당 스키마로 폼 초기화
+  onExport: () => Promise<void>
+  onImport: () => Promise<void>
 }
 
-export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarget }: SchemaManagementProps): React.ReactElement {
+export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarget, onExport, onImport }: SchemaManagementProps): React.ReactElement {
   const isEditing = !!editTarget
 
   const [id, setId] = useState(editTarget?.id ?? '')
+  const [listSearch, setListSearch] = useState('')
   const [displayName, setDisplayName] = useState(editTarget?.displayName ?? '')
   const [schemaJson, setSchemaJson] = useState(
     editTarget ? JSON.stringify(editTarget.schema, null, 2) : '{\n  "type": "object",\n  "required": ["timestamp", "level", "msg"]\n}'
@@ -71,23 +74,49 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 'min(860px, 92vw)', height: '85vh', display: 'flex', flexDirection: 'column', padding: 20, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, alignItems: 'center' }}>
           <h3 style={{ fontSize: 15 }}>{isEditing ? `스키마 편집 — ${editTarget.displayName}` : '스키마 관리'}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {!isEditing && (
+              <>
+                <button onClick={onImport} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '3px 10px' }}>
+                  📥 가져오기
+                </button>
+                <button onClick={onExport} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '3px 10px' }}>
+                  📤 내보내기
+                </button>
+              </>
+            )}
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          </div>
         </div>
 
         {/* 등록된 스키마 목록 (신규 등록 모드에서만 표시) */}
         {!isEditing && schemas.length > 0 && (
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 11, opacity: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>등록된 스키마</div>
-            {schemas.map(s => (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', gap: 8 }}>
-                <span style={{ flex: 1, fontSize: 13 }}>{s.displayName}</span>
-                <span style={{ fontSize: 11, opacity: 0.4 }}>{s.id}</span>
-                {s.hasViewer && <span style={{ fontSize: 11, color: '#818cf8' }}>HTML 뷰어</span>}
-                <button onClick={() => onDelete(s.id)} style={{ background: 'none', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 3, color: '#f87171', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>삭제</button>
-              </div>
-            ))}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 8 }}>
+              <div style={{ fontSize: 11, opacity: 0.5, textTransform: 'uppercase', flex: 1 }}>등록된 스키마 ({schemas.length})</div>
+              {schemas.length >= 4 && (
+                <input
+                  type="text"
+                  placeholder="검색..."
+                  value={listSearch}
+                  onChange={e => setListSearch(e.target.value)}
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4, color: '#e2e8f0', fontSize: 11, padding: '2px 8px', width: 120, outline: 'none' }}
+                />
+              )}
+            </div>
+            {schemas
+              .filter(s => !listSearch || s.displayName.toLowerCase().includes(listSearch.toLowerCase()) || s.id.toLowerCase().includes(listSearch.toLowerCase()))
+              .map(s => (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', gap: 8 }}>
+                  <span style={{ flex: 1, fontSize: 13 }}>{s.displayName}</span>
+                  <span style={{ fontSize: 11, opacity: 0.4 }}>{s.id}</span>
+                  {s.hasViewer && <span style={{ fontSize: 11, color: '#818cf8' }}>HTML 뷰어</span>}
+                  <button onClick={() => onDelete(s.id)} style={{ background: 'none', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 3, color: '#f87171', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>삭제</button>
+                </div>
+              ))
+            }
           </div>
         )}
 

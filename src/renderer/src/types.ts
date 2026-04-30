@@ -28,6 +28,9 @@ declare global {
       save: (id: string, schemaJson: string, configJson: string, viewerHtml: string | null) => Promise<{ ok: boolean }>
       delete: (id: string) => Promise<{ ok: boolean }>
       readViewer: (viewerPath: string) => Promise<{ html: string | null; error?: string }>
+      saveOrder: (order: string[]) => Promise<{ ok: boolean }>
+      exportSchemas: () => Promise<{ ok: boolean; count?: number }>
+      importSchemas: () => Promise<{ ok: boolean; count?: number; error?: string }>
     }
   }
 }

@@ -97,5 +97,12 @@ export function useLogFile() {
     })
   }, [])
 
-  return { ...state, openFile, setFilter, resetFallbackSchemaIds }
+  const resetAllSchemaCache = useCallback(() => {
+    setState(prev => {
+      prev.rows.forEach(r => { r._schemaId = null })
+      return { ...prev }
+    })
+  }, [])
+
+  return { ...state, openFile, setFilter, resetFallbackSchemaIds, resetAllSchemaCache }
 }

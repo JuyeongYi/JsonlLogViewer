@@ -24,29 +24,16 @@ export function findMatchingSchema(
   schemas: SchemaEntry[],
   row: Record<string, unknown>
 ): SchemaEntry | null {
-  let bestMatch: SchemaEntry | null = null
-  let bestScore = -1
-
   for (const entry of schemas) {
     if (!cache.has(entry.id)) {
       const schema = entry.schema
       cache.set(entry.id, (data) => validate(schema, data))
     }
     try {
-      if (cache.get(entry.id)!(row)) {
-        // required 필드 수가 많을수록 더 구체적인 스키마 → 우선
-        const score = Array.isArray(entry.schema.required)
-          ? (entry.schema.required as unknown[]).length
-          : 0
-        if (score > bestScore) {
-          bestScore = score
-          bestMatch = entry
-        }
-      }
+      if (cache.get(entry.id)!(row)) return entry
     } catch { /* skip malformed schema */ }
   }
-
-  return bestMatch
+  return null
 }
 
 export function clearValidatorCache(): void {

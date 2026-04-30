@@ -20,17 +20,7 @@ describe('findMatchingSchema', () => {
     expect(findMatchingSchema(schemas, { level: 'info' })).toBeNull()
   })
 
-  it('required 필드가 더 많은(구체적인) 스키마를 우선 반환한다', () => {
-    // game-event(4개) vs game-session(5개) — session_id 포함 행은 game-session 매칭
-    const schemas = [
-      makeSchema('game-event',   ['timestamp', 'level', 'msg', 'event_type']),
-      makeSchema('game-session', ['timestamp', 'level', 'msg', 'event_type', 'session_id']),
-    ]
-    const row = { timestamp: 't', level: 'info', msg: 'm', event_type: 'e', session_id: 's' }
-    expect(findMatchingSchema(schemas, row)?.id).toBe('game-session')
-  })
-
-  it('specificity가 같으면 등록 순서 첫 번째를 반환한다', () => {
+  it('배열 순서(우선순위)대로 첫 번째 매칭을 반환한다', () => {
     const schemas = [
       makeSchema('first',  ['level']),
       makeSchema('second', ['level']),
@@ -38,13 +28,14 @@ describe('findMatchingSchema', () => {
     expect(findMatchingSchema(schemas, { level: 'info' })?.id).toBe('first')
   })
 
-  it('session_id 없는 행은 덜 구체적인 스키마로 매칭된다', () => {
+  it('specificity와 무관하게 순서 우선 — 앞에 있는 스키마가 이김', () => {
+    // required 5개짜리가 앞에 있어도, required 4개짜리가 앞에 있으면 4개짜리 매칭
     const schemas = [
-      makeSchema('game-event',   ['timestamp', 'level', 'msg', 'event_type']),
-      makeSchema('game-session', ['timestamp', 'level', 'msg', 'event_type', 'session_id']),
+      makeSchema('less-specific',  ['timestamp', 'level', 'msg', 'event_type']),
+      makeSchema('more-specific', ['timestamp', 'level', 'msg', 'event_type', 'session_id']),
     ]
-    const row = { timestamp: 't', level: 'info', msg: 'm', event_type: 'e' }
-    expect(findMatchingSchema(schemas, row)?.id).toBe('game-event')
+    const row = { timestamp: 't', level: 'info', msg: 'm', event_type: 'e', session_id: 's' }
+    expect(findMatchingSchema(schemas, row)?.id).toBe('less-specific')
   })
 
   it('빈 스키마 목록이면 null', () => {
