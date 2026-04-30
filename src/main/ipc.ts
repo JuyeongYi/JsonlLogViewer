@@ -1,4 +1,4 @@
-import { ipcMain, dialog } from 'electron'
+import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { readFileSync, mkdirSync, writeFileSync, rmSync, existsSync, readdirSync, promises as fsPromises } from 'fs'
 import { join } from 'path'
 import AdmZip from 'adm-zip'
@@ -6,6 +6,11 @@ import { loadSchemas, getSchemaDir, saveSchemaOrder } from './schemaRegistry'
 import { watchFile, unwatchFile } from './fileWatcher'
 
 export function registerIpcHandlers(): void {
+  ipcMain.on('window:setTitle', (_event, title: string) => {
+    const win = BrowserWindow.fromWebContents(_event.sender)
+    if (win) win.setTitle(title)
+  })
+
   ipcMain.handle('file:open', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openFile'],

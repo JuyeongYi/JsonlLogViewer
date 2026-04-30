@@ -92,10 +92,14 @@ export default function App(): React.ReactElement {
     session.openPaths.forEach(p => openTab(p))
   }, [])
 
-  // 세션 저장 (탭 변경 시)
+  // 세션 저장 + 타이틀 업데이트 (탭 변경 시)
   useEffect(() => {
     const activeIndex = tabs.findIndex(t => t.id === activeTabId)
     saveSession({ openPaths: tabs.map(t => t.path), activeIndex: Math.max(0, activeIndex) })
+
+    const activeTab = tabs.find(t => t.id === activeTabId)
+    const title = activeTab ? `JsonlLogViewer - ${activeTab.label}` : 'JsonlLogViewer'
+    window.windowApi?.setTitle(title)
   }, [tabs, activeTabId])
 
   // 키보드 단축키

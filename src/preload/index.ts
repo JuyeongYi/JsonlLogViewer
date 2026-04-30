@@ -15,6 +15,10 @@ contextBridge.exposeInMainWorld('fileApi', {
   },
 })
 
+contextBridge.exposeInMainWorld('windowApi', {
+  setTitle: (title: string) => ipcRenderer.send('window:setTitle', title),
+})
+
 contextBridge.exposeInMainWorld('schemaApi', {
   list: () => ipcRenderer.invoke('schema:list'),
   save: (id: string, schemaJson: string, configJson: string, viewerHtml: string | null) =>

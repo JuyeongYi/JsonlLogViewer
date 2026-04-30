@@ -26,6 +26,9 @@ export interface Tab {
 // window.fileApi 타입 선언 (preload contextBridge)
 declare global {
   interface Window {
+    windowApi: {
+      setTitle: (title: string) => void
+    }
     fileApi: {
       openFile: () => Promise<string | null>
       readFile: (path: string) => Promise<{ content: string; error?: string }>
