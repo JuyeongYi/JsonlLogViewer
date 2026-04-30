@@ -1,0 +1,104 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0f1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:12px;font-size:13px;line-height:1.6}
+
+.header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+.session-badge{font-family:monospace;font-size:10px;background:rgba(129,140,248,.12);color:#818cf8;padding:2px 8px;border-radius:3px;letter-spacing:.02em}
+.project-badge{font-size:11px;opacity:.45;font-family:monospace}
+.ts{font-size:11px;color:#64748b;margin-left:auto;white-space:nowrap}
+
+.msg-block{font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.cmd{color:#818cf8;font-weight:700}
+.paste-ref{color:#94a3b8;font-style:italic;font-size:11px}
+.img-ref{color:#f59e0b;font-size:11px}
+
+.pastes{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.paste-item{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:6px;overflow:hidden}
+.paste-header{font-size:10px;color:#64748b;padding:4px 10px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;user-select:none;cursor:pointer}
+.paste-header:hover{background:rgba(255,255,255,.06)}
+.paste-type{background:rgba(251,191,36,.12);color:#fbbf24;padding:1px 5px;border-radius:2px;font-size:9px;text-transform:uppercase}
+.paste-body{font-family:'Cascadia Code','Consolas',monospace;font-size:11px;padding:8px 12px;white-space:pre-wrap;word-break:break-all;opacity:.82;line-height:1.6;max-height:220px;overflow-y:auto;transition:max-height .2s}
+.paste-body.collapsed{max-height:0;padding:0 12px;overflow:hidden}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px}
+</style>
+
+<div id="root"></div>
+
+<script>
+function escHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+}
+
+function formatDisplay(text){
+  // 줄별로 처리
+  return text.split('\n').map(function(line){
+    // /command 형식 하이라이트
+    if(/^\/\S+/.test(line.trim())){
+      return '<span class="cmd">'+escHtml(line)+'</span>'
+    }
+    // [Pasted text #N ...] 레퍼런스
+    var pasteRef = line.replace(/\[Pasted text #(\d+)[^\]]*\]/g,'<span class="paste-ref">📎 [붙여넣기 #$1]</span>')
+    // [Image #N] 레퍼런스
+    pasteRef = pasteRef.replace(/\[Image #(\d+)\]/g,'<span class="img-ref">🖼 [이미지 #$1]</span>')
+    if(pasteRef !== line) return pasteRef
+    return escHtml(line)
+  }).join('\n')
+}
+
+function baseName(p){
+  if(!p)return ''
+  return p.replace(/\\/g,'/').split('/').pop()
+}
+
+window.addEventListener('message',function(e){
+  if(e.data.type!=='LOG_DATA')return
+  var d=e.data.payload
+
+  var ts=d.timestamp?new Date(d.timestamp).toLocaleString('ko-KR'):''
+  var sid=d.sessionId?d.sessionId.slice(0,8)+'…':''
+  var proj=baseName(d.project)
+  var pastedKeys=Object.keys(d.pastedContents||{}).sort()
+  var hasPaste=pastedKeys.length>0
+
+  // 헤더
+  var header='<div class="header">'+
+    '<span class="session-badge">'+escHtml(sid)+'</span>'+
+    (proj?'<span class="project-badge">'+escHtml(proj)+'</span>':'')+
+    '<span class="ts">'+escHtml(ts)+'</span>'+
+  '</div>'
+
+  // 메시지
+  var msgHtml='<div class="msg-block">'+formatDisplay(d.display||'')+'</div>'
+
+  // 붙여넣기 블록들
+  var pastesHtml=''
+  if(hasPaste){
+    pastesHtml='<div class="pastes">'
+    pastedKeys.forEach(function(k){
+      var item=d.pastedContents[k]
+      var lines=String(item.content||'').split('\n').length
+      pastesHtml+=
+        '<div class="paste-item">'+
+          '<div class="paste-header" onclick="togglePaste(this)">'+
+            '<span>붙여넣기 #'+escHtml(String(item.id))+' ('+lines+'줄)</span>'+
+            '<span class="paste-type">'+escHtml(item.type||'text')+'</span>'+
+          '</div>'+
+          '<div class="paste-body">'+escHtml(item.content||'')+'</div>'+
+        '</div>'
+    })
+    pastesHtml+='</div>'
+  }
+
+  document.getElementById('root').innerHTML=header+msgHtml+pastesHtml
+})
+
+function togglePaste(header){
+  var body=header.nextElementSibling
+  body.classList.toggle('collapsed')
+}
+</script>

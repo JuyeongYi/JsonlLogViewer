@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "required": ["display", "pastedContents", "timestamp", "sessionId"],
+  "properties": {
+    "display": {
+      "type": "string"
+    },
+    "pastedContents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "type", "content"],
+        "properties": {
+          "id":      { "type": "integer" },
+          "type":    { "type": "string" },
+          "content": { "type": "string" }
+        }
+      }
+    },
+    "timestamp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp (milliseconds)"
+    },
+    "sessionId": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string"
+    }
+  }
+}
