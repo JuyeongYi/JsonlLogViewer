@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
+import type { LogRow, SchemaEntry } from './types'
 import './styles/app.css'
 import { useLogFile } from './hooks/useLogFile'
 import { useSchemaRegistry } from './hooks/useSchemaRegistry'
@@ -9,7 +10,7 @@ import { Sidebar } from './components/Sidebar'
 import { SchemaManagement } from './components/SchemaManagement'
 
 export default function App(): React.ReactElement {
-  const { path, rows, filteredRows, filter, isLoading, error, openFile, setFilter, resetFallbackSchemaIds, resetAllSchemaCache } = useLogFile()
+  const { path, rows, filteredRows, filter, isLoading, error, openFile, setFilter, resetFallbackSchemaIds, resetAllSchemaCache, forceSchemaRerender } = useLogFile()
   const { schemas, saveSchema, deleteSchema, reorderSchemas, reload: reloadSchemas } = useSchemaRegistry()
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [showSchemaManagement, setShowSchemaManagement] = useState(false)
@@ -50,6 +51,35 @@ export default function App(): React.ReactElement {
 
   const selectedRow = selectedIndex !== null ? filteredRows[selectedIndex] ?? null : null
 
+  // 로그 행 우클릭 메뉴
+  const [rowMenu, setRowMenu] = useState<{ x: number; y: number; row: LogRow } | null>(null)
+  const rowMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!rowMenu) return
+    const close = (e: MouseEvent) => {
+      if (rowMenuRef.current && !rowMenuRef.current.contains(e.target as Node)) setRowMenu(null)
+    }
+    window.addEventListener('mousedown', close)
+    return () => window.removeEventListener('mousedown', close)
+  }, [rowMenu])
+
+  const handleRowContextMenu = useCallback((e: React.MouseEvent, index: number) => {
+    e.preventDefault()
+    const row = filteredRows[index]
+    if (row) setRowMenu({ x: e.clientX, y: e.clientY, row })
+  }, [filteredRows])
+
+  const handleAssignSchema = useCallback((row: LogRow, schemaId: string | null) => {
+    row._schemaId = schemaId
+    row._schemaPinned = schemaId !== null
+    forceSchemaRerender()
+    setRowMenu(null)
+    // 해당 행이 선택 중이 아니면 선택해서 디테일 패널에 반영
+    const idx = filteredRows.indexOf(row)
+    if (idx !== -1) setSelectedIndex(idx)
+  }, [filteredRows, forceSchemaRerender])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* 툴바 */}
@@ -89,6 +119,7 @@ export default function App(): React.ReactElement {
               rows={filteredRows}
               selectedIndex={selectedIndex}
               onSelect={i => setSelectedIndex(i === selectedIndex ? null : i)}
+              onRowContextMenu={handleRowContextMenu}
             />
           </div>
           <DetailPanel
@@ -98,6 +129,64 @@ export default function App(): React.ReactElement {
           />
         </div>
       </div>
+
+      {/* 로그 행 우클릭 — 스키마 지정 메뉴 */}
+      {rowMenu && (
+        <div
+          ref={rowMenuRef}
+          style={{
+            position: 'fixed',
+            top: rowMenu.y,
+            left: rowMenu.x,
+            background: '#1e1e2e',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 6,
+            padding: '4px 0',
+            zIndex: 1000,
+            minWidth: 180,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+          }}
+        >
+          <div style={{ padding: '4px 12px 6px', fontSize: 10, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            스키마 지정
+          </div>
+
+          {schemas.map(s => {
+            const isCurrent = rowMenu.row._schemaId === s.id
+            const isPinned = isCurrent && rowMenu.row._schemaPinned
+            return (
+              <button
+                key={s.id}
+                onClick={() => handleAssignSchema(rowMenu.row, s.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', background: 'none', border: 'none', color: isCurrent ? '#a5b4fc' : '#e2e8f0', cursor: 'pointer', padding: '6px 14px', fontSize: 13 }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.2)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+              >
+                <span style={{ width: 14, textAlign: 'center', fontSize: 11 }}>
+                  {isPinned ? '📌' : isCurrent ? '●' : ''}
+                </span>
+                {s.displayName}
+              </button>
+            )
+          })}
+
+          {schemas.length > 0 && (
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 2, paddingTop: 2 }} />
+          )}
+
+          <button
+            onClick={() => handleAssignSchema(rowMenu.row, null)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '6px 14px', fontSize: 13 }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+          >
+            <span style={{ width: 14, textAlign: 'center', fontSize: 11 }}>
+              {!rowMenu.row._schemaPinned && (rowMenu.row._schemaId === null || rowMenu.row._schemaId === '') ? '●' : ''}
+            </span>
+            자동 감지 (초기화)
+          </button>
+        </div>
+      )}
 
       {/* 스키마 관리 모달 */}
       {showSchemaManagement && (

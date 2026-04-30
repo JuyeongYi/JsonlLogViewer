@@ -1,4 +1,3 @@
-// src/renderer/src/components/LogRow.tsx
 import React from 'react'
 import type { LogRow as LogRowType } from '../types'
 
@@ -14,9 +13,10 @@ interface LogRowProps {
   row: LogRowType
   isSelected: boolean
   onClick: () => void
+  onContextMenu: (e: React.MouseEvent) => void
 }
 
-export function LogRow({ row, isSelected, onClick }: LogRowProps): React.ReactElement {
+export function LogRow({ row, isSelected, onClick, onContextMenu }: LogRowProps): React.ReactElement {
   const levelColor = LEVEL_COLORS[String(row.level ?? '').toLowerCase()] ?? '#e2e8f0'
   const ts = row.timestamp ? String(row.timestamp) : '—'
   const displayTs = ts.length > 19 ? ts.slice(11, 19) : ts
@@ -24,6 +24,7 @@ export function LogRow({ row, isSelected, onClick }: LogRowProps): React.ReactEl
   return (
     <div
       onClick={onClick}
+      onContextMenu={onContextMenu}
       style={{
         display: 'grid',
         gridTemplateColumns: '90px 60px 110px 1fr auto',
@@ -49,9 +50,14 @@ export function LogRow({ row, isSelected, onClick }: LogRowProps): React.ReactEl
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {String(row.msg ?? row._raw)}
       </span>
-      {row._parseError && (
-        <span title={row._parseError} style={{ color: '#f87171', fontSize: 14 }}>⚠</span>
-      )}
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        {row._schemaPinned && (
+          <span title="스키마 수동 지정됨" style={{ fontSize: 10, color: '#818cf8', opacity: 0.7 }}>📌</span>
+        )}
+        {row._parseError && (
+          <span title={row._parseError} style={{ color: '#f87171', fontSize: 14 }}>⚠</span>
+        )}
+      </span>
     </div>
   )
 }

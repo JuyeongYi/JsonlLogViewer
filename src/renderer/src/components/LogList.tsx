@@ -8,9 +8,10 @@ interface LogListProps {
   rows: LogRowType[]
   selectedIndex: number | null
   onSelect: (index: number) => void
+  onRowContextMenu: (e: React.MouseEvent, index: number) => void
 }
 
-export function LogList({ rows, selectedIndex, onSelect }: LogListProps): React.ReactElement {
+export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: LogListProps): React.ReactElement {
   const parentRef = useRef<HTMLDivElement>(null)
 
   const virtualizer = useVirtualizer({
@@ -70,6 +71,7 @@ export function LogList({ rows, selectedIndex, onSelect }: LogListProps): React.
               row={rows[virtualItem.index]}
               isSelected={selectedIndex === virtualItem.index}
               onClick={() => onSelect(virtualItem.index)}
+              onContextMenu={e => onRowContextMenu(e, virtualItem.index)}
             />
           </div>
         ))}

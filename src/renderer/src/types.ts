@@ -3,6 +3,7 @@ export interface LogRow {
   _raw: string
   _parseError?: string   // 설정 시 경고 아이콘 표시
   _schemaId: string | null  // null=미검증, ''=미발견(fallback), '<id>'=매칭된 스키마
+  _schemaPinned?: boolean   // true=수동 지정, 스키마 변경 시 초기화 안 함
   timestamp?: string | number
   level?: string
   msg?: string

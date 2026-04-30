@@ -87,6 +87,7 @@ export function useLogFile() {
   const resetFallbackSchemaIds = useCallback((changedId: string | null) => {
     setState(prev => {
       prev.rows.forEach(r => {
+        if (r._schemaPinned) return  // 수동 지정 행은 건드리지 않음
         if (changedId === null) {
           if (r._schemaId === '') r._schemaId = null
         } else {
@@ -99,10 +100,15 @@ export function useLogFile() {
 
   const resetAllSchemaCache = useCallback(() => {
     setState(prev => {
-      prev.rows.forEach(r => { r._schemaId = null })
+      prev.rows.forEach(r => { if (!r._schemaPinned) r._schemaId = null })
       return { ...prev }
     })
   }, [])
 
-  return { ...state, openFile, setFilter, resetFallbackSchemaIds, resetAllSchemaCache }
+  // 강제 지정 후 디테일 패널 re-render 트리거
+  const forceSchemaRerender = useCallback(() => {
+    setState(prev => ({ ...prev }))
+  }, [])
+
+  return { ...state, openFile, setFilter, resetFallbackSchemaIds, resetAllSchemaCache, forceSchemaRerender }
 }
