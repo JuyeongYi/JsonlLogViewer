@@ -11,6 +11,7 @@ interface FilterBarProps {
   totalCount: number
   filteredCount: number
   onChange: (filter: FilterState) => void
+  inputRef?: React.Ref<HTMLInputElement>
 }
 
 function useRegexInput(
@@ -36,7 +37,7 @@ function useRegexInput(
   return { local, invalid, handle }
 }
 
-export function FilterBar({ filter, totalCount, filteredCount, onChange }: FilterBarProps): React.ReactElement {
+export function FilterBar({ filter, totalCount, filteredCount, onChange, inputRef }: FilterBarProps): React.ReactElement {
   const msg = useRegexInput(filter.msgRegex, v => onChange({ ...filter, msgRegex: v }))
   const cat = useRegexInput(filter.categoryRegex, v => onChange({ ...filter, categoryRegex: v }))
 
@@ -106,7 +107,7 @@ export function FilterBar({ filter, totalCount, filteredCount, onChange }: Filte
       {/* msg 정규식 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 140 }}>
         <span style={{ fontSize: 11, opacity: 0.4, whiteSpace: 'nowrap' }}>msg:</span>
-        <input type="text" placeholder="error|fail" value={msg.local} onChange={e => msg.handle(e.target.value)} style={inputStyle(msg.invalid)} />
+        <input ref={inputRef} type="text" placeholder="error|fail" value={msg.local} onChange={e => msg.handle(e.target.value)} style={inputStyle(msg.invalid)} />
         {msg.invalid && <span style={{ fontSize: 11, color: '#f87171' }}>!</span>}
       </div>
 

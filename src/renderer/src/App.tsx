@@ -11,6 +11,13 @@ import { DetailPanel } from './components/DetailPanel'
 import { Sidebar } from './components/Sidebar'
 import { SchemaManagement } from './components/SchemaManagement'
 import { TabBar } from './components/TabBar'
+import { ViewSwitcher, type ViewMode } from './components/ViewSwitcher'
+import { StatsView } from './components/StatsView'
+import { TimelineView } from './components/TimelineView'
+import { DiffView } from './components/DiffView'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { saveSession, loadSession } from './hooks/useSessionRestore'
+import { rowsToCsv, rowsToJsonl, downloadBlob } from './utils/exporter'
 
 const INITIAL_FILTER = { levels: [], sortOrder: 'asc' as const, msgRegex: '', categoryRegex: '' }
 
@@ -34,6 +41,8 @@ export default function App(): React.ReactElement {
   const [selectedIndexes, setSelectedIndexes] = useState<Map<string, number | null>>(new Map())
 
   const [newRowTabs, setNewRowTabs] = useState<Map<string, 'error'|'warn'|'info'>>(new Map())
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // 새 행들의 최고 레벨 계산 (debug는 null 반환 → 점 표시 안 함)
   const calcDotLevel = (rows: import('./types').LogRow[]): 'error'|'warn'|'info'|null => {
@@ -69,6 +78,28 @@ export default function App(): React.ReactElement {
     if (!path) return
     openTab(path)
   }, [openTab])
+
+  // 세션 복원 (마운트 시 1회)
+  useEffect(() => {
+    const session = loadSession()
+    if (!session) return
+    session.openPaths.forEach(p => openTab(p))
+  }, [])
+
+  // 세션 저장 (탭 변경 시)
+  useEffect(() => {
+    const activeIndex = tabs.findIndex(t => t.id === activeTabId)
+    saveSession({ openPaths: tabs.map(t => t.path), activeIndex: Math.max(0, activeIndex) })
+  }, [tabs, activeTabId])
+
+  // 키보드 단축키
+  useKeyboardShortcuts({
+    onNextRow: () => setSelectedIndex(selectedIndex === null ? 0 : Math.min(selectedIndex + 1, filteredRows.length - 1)),
+    onPrevRow: () => setSelectedIndex(selectedIndex === null ? 0 : Math.max(selectedIndex - 1, 0)),
+    onSearch: () => searchInputRef.current?.focus(),
+    onCloseDetail: () => setSelectedIndex(null),
+    onOpenFile: handleOpenFile,
+  })
 
   // 탭이 열릴 때 파일 로드
   useEffect(() => {
@@ -239,6 +270,20 @@ export default function App(): React.ReactElement {
     if (row) setRowMenu({ x: e.clientX, y: e.clientY, row })
   }, [filteredRows])
 
+  // CSV/JSONL 내보내기
+  const handleExportCsv = useCallback(() => {
+    const fields = [...new Set(filteredRows.flatMap(r => Object.keys(r).filter(k => !k.startsWith('_'))))].sort()
+    downloadBlob(rowsToCsv(filteredRows, fields), 'export.csv', 'text/csv')
+  }, [filteredRows])
+
+  const handleExportJsonl = useCallback(() => {
+    downloadBlob(rowsToJsonl(filteredRows), 'export.jsonl', 'application/x-ndjson')
+  }, [filteredRows])
+
+  // Diff 뷰를 위한 두 번째 탭 상태
+  const secondTab = tabs.find(t => t.id !== activeTabId)
+  const secondState = secondTab ? (tabStates.get(secondTab.id) ?? makeEmptyState()) : makeEmptyState()
+
   const handleAssignSchema = useCallback((row: LogRow, schemaId: string | null) => {
     row._schemaId = schemaId
     row._schemaPinned = schemaId !== null
@@ -255,6 +300,17 @@ export default function App(): React.ReactElement {
         <span style={{ fontWeight: 700, fontSize: 13, color: '#818cf8' }}>JsonlLogViewer</span>
         {activeState.isLoading && <span style={{ fontSize: 12, opacity: 0.5 }}>로딩 중...</span>}
         {activeState.error && <span style={{ fontSize: 12, color: '#f87171' }}>오류: {activeState.error}</span>}
+        <div style={{ flex: 1 }} />
+        {filteredRows.length > 0 && (
+          <>
+            <button onClick={handleExportCsv} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '2px 8px' }}>
+              CSV
+            </button>
+            <button onClick={handleExportJsonl} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '2px 8px' }}>
+              JSONL
+            </button>
+          </>
+        )}
       </div>
 
       {/* 탭 바 */}
@@ -277,6 +333,7 @@ export default function App(): React.ReactElement {
         totalCount={activeState.rows.length}
         filteredCount={filteredRows.length}
         onChange={setFilter}
+        inputRef={searchInputRef}
       />
 
       {/* 메인 영역 */}
@@ -289,6 +346,10 @@ export default function App(): React.ReactElement {
           onReorder={handleReorderSchemas}
         />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* 뷰 전환 */}
+          <ViewSwitcher current={viewMode} onChange={setViewMode} hasTwoTabs={tabs.length >= 2} />
+
+          {/* 메인 뷰 */}
           <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
             {tabs.length === 0 ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 12, opacity: 0.4 }}>
@@ -297,20 +358,31 @@ export default function App(): React.ReactElement {
                   파일 열기
                 </button>
               </div>
-            ) : (
+            ) : viewMode === 'list' ? (
               <LogList
                 rows={filteredRows}
                 selectedIndex={selectedIndex}
                 onSelect={i => setSelectedIndex(i === selectedIndex ? null : i)}
                 onRowContextMenu={handleRowContextMenu}
               />
-            )}
+            ) : viewMode === 'stats' ? (
+              <StatsView rows={filteredRows} />
+            ) : viewMode === 'timeline' ? (
+              <TimelineView rows={filteredRows} />
+            ) : viewMode === 'diff' && tabs.length >= 2 ? (
+              <DiffView
+                leftRows={activeState.filteredRows} leftLabel={tabs.find(t => t.id === activeTabId)?.label ?? ''}
+                rightRows={secondState.filteredRows} rightLabel={secondTab?.label ?? ''}
+              />
+            ) : null}
           </div>
-          <DetailPanel
-            row={selectedRow}
-            schemas={schemas}
-            onClose={() => setSelectedIndex(null)}
-          />
+          {viewMode === 'list' && (
+            <DetailPanel
+              row={selectedRow}
+              schemas={schemas}
+              onClose={() => setSelectedIndex(null)}
+            />
+          )}
         </div>
       </div>
 
