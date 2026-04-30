@@ -26,13 +26,13 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
   return (
     <div style={{ width: 180, borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', flexShrink: 0, background: 'rgba(255,255,255,0.02)', position: 'relative' }}>
       <div style={{ display: 'flex', alignItems: 'center', padding: '6px 8px 6px 12px', gap: 6 }}>
+        <span style={{ fontSize: 11, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em', flex: 1 }}>스키마</span>
         <button
           onClick={onOpenSchemaManagement}
           style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '2px 8px', flexShrink: 0 }}
         >
           관리
         </button>
-        <span style={{ fontSize: 11, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>스키마</span>
       </div>
       <div style={{ flex: 1, overflow: 'auto' }}>
         {schemas.length === 0 ? (
