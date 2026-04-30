@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useCallback } from 'react'
 import './styles/app.css'
 import { useLogFile } from './hooks/useLogFile'
 import { useSchemaRegistry } from './hooks/useSchemaRegistry'
@@ -16,14 +16,20 @@ export default function App(): React.ReactElement {
   const [editTarget, setEditTarget] = useState<import('./types').SchemaEntry | undefined>(undefined)
 
   // 스키마가 추가됐을 때만 fallback 행들 재탐색 초기화
-  // 스키마 목록이 변경될 때마다 (추가·수정·삭제) 모든 행 캐시 초기화
-  const prevSchemasRef = useRef(schemas)
-  useEffect(() => {
-    if (prevSchemasRef.current !== schemas) {
-      resetFallbackSchemaIds()
-    }
-    prevSchemasRef.current = schemas
-  }, [schemas, resetFallbackSchemaIds])
+  // 스키마 저장: 신규 추가면 fallback 초기화, 수정이면 해당 ID 매칭 행 초기화
+  const handleSaveSchema = useCallback(async (
+    id: string, schemaJson: string, displayName: string, viewerHtml: string | null
+  ) => {
+    const isNew = !schemas.find(s => s.id === id)
+    await saveSchema(id, schemaJson, displayName, viewerHtml)
+    resetFallbackSchemaIds(isNew ? null : id)
+  }, [schemas, saveSchema, resetFallbackSchemaIds])
+
+  // 스키마 삭제: 해당 ID 매칭 행 초기화
+  const handleDeleteSchema = useCallback(async (id: string) => {
+    await deleteSchema(id)
+    resetFallbackSchemaIds(id)
+  }, [deleteSchema, resetFallbackSchemaIds])
 
   const selectedRow = selectedIndex !== null ? filteredRows[selectedIndex] ?? null : null
 
@@ -57,7 +63,7 @@ export default function App(): React.ReactElement {
           schemas={schemas}
           onOpenSchemaManagement={() => { setEditTarget(undefined); setShowSchemaManagement(true) }}
           onEditSchema={s => { setEditTarget(s); setShowSchemaManagement(true) }}
-          onDeleteSchema={deleteSchema}
+          onDeleteSchema={handleDeleteSchema}
         />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
@@ -79,8 +85,8 @@ export default function App(): React.ReactElement {
       {showSchemaManagement && (
         <SchemaManagement
           schemas={schemas}
-          onSave={saveSchema}
-          onDelete={deleteSchema}
+          onSave={handleSaveSchema}
+          onDelete={handleDeleteSchema}
           onClose={() => { setShowSchemaManagement(false); setEditTarget(undefined) }}
           editTarget={editTarget}
         />

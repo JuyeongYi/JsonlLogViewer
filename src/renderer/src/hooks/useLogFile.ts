@@ -81,10 +81,18 @@ export function useLogFile() {
     }))
   }, [])
 
-  // 스키마 목록 변경 시 모든 행의 캐시를 초기화해 재탐색 유도
-  const resetFallbackSchemaIds = useCallback(() => {
+  // 스키마 변경에 따른 targeted 캐시 초기화
+  // changedId === null  → 새 스키마 추가: fallback('') 행만 초기화
+  // changedId === '<id>' → 수정/삭제: 해당 ID 매칭 행 + fallback 행 초기화
+  const resetFallbackSchemaIds = useCallback((changedId: string | null) => {
     setState(prev => {
-      prev.rows.forEach(r => { r._schemaId = null })
+      prev.rows.forEach(r => {
+        if (changedId === null) {
+          if (r._schemaId === '') r._schemaId = null
+        } else {
+          if (r._schemaId === changedId || r._schemaId === '') r._schemaId = null
+        }
+      })
       return { ...prev }
     })
   }, [])
