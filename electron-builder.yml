@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: jsonllogviewer-scaffold
+appId: com.bluehole.jsonllogviewer
+productName: JsonlLogViewer
 directories:
   buildResources: build
 files:
@@ -12,9 +12,9 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: jsonllogviewer-scaffold
+  executableName: JsonlLogViewer
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: JsonlLogViewer-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
