@@ -42,7 +42,8 @@ export default function App(): React.ReactElement {
 
   const [newRowTabs, setNewRowTabs] = useState<Map<string, 'error'|'warn'|'info'>>(new Map())
   const [viewMode, setViewMode] = useState<ViewMode>('list')
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const msgInputRef = useRef<HTMLInputElement>(null)
+  const categoryInputRef = useRef<HTMLInputElement>(null)
 
   // 새 행들의 최고 레벨 계산 (debug는 null 반환 → 점 표시 안 함)
   const calcDotLevel = (rows: import('./types').LogRow[]): 'error'|'warn'|'info'|null => {
@@ -96,7 +97,18 @@ export default function App(): React.ReactElement {
   useKeyboardShortcuts({
     onNextRow: () => setSelectedIndex(selectedIndex === null ? 0 : Math.min(selectedIndex + 1, filteredRows.length - 1)),
     onPrevRow: () => setSelectedIndex(selectedIndex === null ? 0 : Math.max(selectedIndex - 1, 0)),
-    onSearch: () => searchInputRef.current?.focus(),
+    onSearchMsg: () => msgInputRef.current?.focus(),
+    onSearchCategory: () => categoryInputRef.current?.focus(),
+    onNextTab: () => {
+      const idx = tabs.findIndex(t => t.id === activeTabId)
+      const next = tabs[(idx + 1) % tabs.length]
+      if (next) setActiveTabId(next.id)
+    },
+    onPrevTab: () => {
+      const idx = tabs.findIndex(t => t.id === activeTabId)
+      const prev = tabs[(idx - 1 + tabs.length) % tabs.length]
+      if (prev) setActiveTabId(prev.id)
+    },
     onCloseDetail: () => setSelectedIndex(null),
     onOpenFile: handleOpenFile,
   })
@@ -333,7 +345,8 @@ export default function App(): React.ReactElement {
         totalCount={activeState.rows.length}
         filteredCount={filteredRows.length}
         onChange={setFilter}
-        inputRef={searchInputRef}
+        msgInputRef={msgInputRef}
+        categoryInputRef={categoryInputRef}
       />
 
       {/* 메인 영역 */}
