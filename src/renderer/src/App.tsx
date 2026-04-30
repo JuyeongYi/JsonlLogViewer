@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import './styles/app.css'
-import type { LogRow, LogFileState, SchemaEntry } from './types'
-import { applyFilter } from './hooks/useLogFile'
+import type { LogRow, SchemaEntry } from './types'
+import { applyFilter, type LogFileState } from './hooks/useLogFile'
 import { parseJsonlContent } from './utils/parser'
 import { useTabManager } from './hooks/useTabManager'
 import { useSchemaRegistry } from './hooks/useSchemaRegistry'
@@ -19,7 +19,9 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { saveSession, loadSession } from './hooks/useSessionRestore'
 import { rowsToCsv, rowsToJsonl, downloadBlob } from './utils/exporter'
 
-const INITIAL_FILTER = { levels: [], sortOrder: 'asc' as const, msgRegex: '', categoryRegex: '' }
+import type { FilterState } from './types'
+
+const INITIAL_FILTER: FilterState = { levels: [], sortOrder: 'asc', msgRegex: '', categoryRegex: '' }
 
 const toggleLevel = (levels: string[], level: string): string[] =>
   levels.includes(level) ? levels.filter(l => l !== level) : [...levels, level]
@@ -296,7 +298,7 @@ export default function App(): React.ReactElement {
 
   // CSV/JSONL 내보내기
   const handleExportCsv = useCallback(() => {
-    const fields = [...new Set(filteredRows.flatMap(r => Object.keys(r).filter(k => !k.startsWith('_'))))].sort()
+    const fields: string[] = [...new Set(filteredRows.flatMap(r => Object.keys(r).filter(k => !k.startsWith('_'))))].sort()
     downloadBlob(rowsToCsv(filteredRows, fields), 'export.csv', 'text/csv')
   }, [filteredRows])
 

@@ -85,7 +85,7 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
           <div style={{ padding: '4px 12px', fontSize: 12, opacity: 0.3 }}>
             {search ? '검색 결과 없음' : '등록된 스키마 없음'}
           </div>
-        ) : filtered.map((s, i) => {
+        ) : filtered.map((s) => {
           // 검색 중에는 드래그 비활성
           const draggable = !search
           const globalIndex = schemas.indexOf(s)
