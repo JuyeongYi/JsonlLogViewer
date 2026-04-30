@@ -8,9 +8,6 @@ on:
 permissions:
   contents: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Node.js 20 deprecation 대응
-
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -29,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npx vitest run
+        run: npm test
 
       - name: Build app
         run: npm run build
@@ -38,10 +35,6 @@ jobs:
         run: npx electron-builder --win --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-
-      - name: List dist output
-        run: Get-ChildItem dist -Recurse -Filter "*.exe" | Select-Object FullName, Length
-        shell: pwsh
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
