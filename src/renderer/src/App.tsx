@@ -108,6 +108,8 @@ export default function App(): React.ReactElement {
     onToggleWarn:  () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'warn') }),
     onToggleInfo:  () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'info') }),
     onToggleDebug: () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'debug') }),
+    onNextView: () => setViewMode(v => { const VIEWS: ViewMode[] = ['list','stats','timeline','diff']; const i = VIEWS.indexOf(v); return VIEWS[(i + 1) % VIEWS.length] }),
+    onPrevView: () => setViewMode(v => { const VIEWS: ViewMode[] = ['list','stats','timeline','diff']; const i = VIEWS.indexOf(v); return VIEWS[(i - 1 + VIEWS.length) % VIEWS.length] }),
     onNextTab: () => {
       const idx = tabs.findIndex(t => t.id === activeTabId)
       const next = tabs[(idx + 1) % tabs.length]

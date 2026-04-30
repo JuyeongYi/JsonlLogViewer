@@ -13,6 +13,8 @@ export interface ShortcutHandlers {
   onToggleWarn: () => void     // Ctrl+w → warn 토글
   onToggleInfo: () => void     // Ctrl+e → info 토글
   onToggleDebug: () => void    // Ctrl+r → debug 토글
+  onNextView: () => void       // Shift+j → 다음 뷰
+  onPrevView: () => void       // Shift+k → 이전 뷰
   onCloseDetail: () => void
   onOpenFile: () => void
 }
@@ -24,8 +26,10 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
       const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
 
       if (!isInput) {
-        if (e.key === 'j' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onNextRow() }
-        if (e.key === 'k' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onPrevRow() }
+        if (e.key === 'j' && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); handlers.onNextRow() }
+        if (e.key === 'k' && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); handlers.onPrevRow() }
+        if (e.key === 'J' || (e.key === 'j' && e.shiftKey)) { e.preventDefault(); handlers.onNextView() }
+        if (e.key === 'K' || (e.key === 'k' && e.shiftKey)) { e.preventDefault(); handlers.onPrevView() }
         if (e.key === 'i' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchMsg() }
         if (e.key === 'u' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchCategory() }
         if (e.key === 'Escape') { e.preventDefault(); handlers.onCloseDetail() }
