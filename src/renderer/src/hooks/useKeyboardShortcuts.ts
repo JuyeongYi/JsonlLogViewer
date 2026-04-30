@@ -9,6 +9,10 @@ export interface ShortcutHandlers {
   onClearCategory: () => void  // Ctrl+u → 카테고리 입력 비우기
   onNextTab: () => void        // Ctrl+j → 다음 탭
   onPrevTab: () => void        // Ctrl+k → 이전 탭
+  onToggleError: () => void    // Ctrl+q → error 토글
+  onToggleWarn: () => void     // Ctrl+w → warn 토글
+  onToggleInfo: () => void     // Ctrl+e → info 토글
+  onToggleDebug: () => void    // Ctrl+r → debug 토글
   onCloseDetail: () => void
   onOpenFile: () => void
 }
@@ -32,6 +36,10 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
       if (ctrl && e.key === 'u') { e.preventDefault(); handlers.onClearCategory() }
       if (ctrl && e.key === 'j') { e.preventDefault(); handlers.onNextTab() }
       if (ctrl && e.key === 'k') { e.preventDefault(); handlers.onPrevTab() }
+      if (ctrl && e.key === 'q') { e.preventDefault(); handlers.onToggleError() }
+      if (ctrl && e.key === 'w') { e.preventDefault(); handlers.onToggleWarn() }
+      if (ctrl && e.key === 'e') { e.preventDefault(); handlers.onToggleInfo() }
+      if (ctrl && e.key === 'r') { e.preventDefault(); handlers.onToggleDebug() }
       if (ctrl && e.key === 'o') { e.preventDefault(); handlers.onOpenFile() }
     }
     window.addEventListener('keydown', handle)

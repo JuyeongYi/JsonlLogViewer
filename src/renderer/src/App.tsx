@@ -21,6 +21,9 @@ import { rowsToCsv, rowsToJsonl, downloadBlob } from './utils/exporter'
 
 const INITIAL_FILTER = { levels: [], sortOrder: 'asc' as const, msgRegex: '', categoryRegex: '' }
 
+const toggleLevel = (levels: string[], level: string): string[] =>
+  levels.includes(level) ? levels.filter(l => l !== level) : [...levels, level]
+
 function makeEmptyState(): LogFileState {
   return {
     path: null,
@@ -101,6 +104,10 @@ export default function App(): React.ReactElement {
     onSearchCategory: () => categoryInputRef.current?.focus(),
     onClearMsg: () => { setFilter({ ...activeState.filter, msgRegex: '' }); msgInputRef.current?.focus() },
     onClearCategory: () => { setFilter({ ...activeState.filter, categoryRegex: '' }); categoryInputRef.current?.focus() },
+    onToggleError: () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'error') }),
+    onToggleWarn:  () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'warn') }),
+    onToggleInfo:  () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'info') }),
+    onToggleDebug: () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'debug') }),
     onNextTab: () => {
       const idx = tabs.findIndex(t => t.id === activeTabId)
       const next = tabs[(idx + 1) % tabs.length]

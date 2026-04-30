@@ -1,26 +1,25 @@
-/* ── 다크 모드 (기본) ── */
+/* ── 다크 모드 (기본 + 고대비) ── */
 :root {
   color-scheme: dark light;
 
-  --bg:          #1c1c1e;
-  --bg-raised:   #2c2c2e;
-  --bg-elevated: #3a3a3c;
+  --bg:          #161618;
+  --bg-raised:   #222224;
+  --bg-elevated: #2c2c2e;
   --bg-overlay:  #111113;
 
-  --text:        #e5e5ea;
-  --text-2:      #aeaeb2;
-  --text-3:      #636366;
+  --text:        #f0f0f5;   /* 더 밝게 */
+  --text-2:      #c8c8d0;
+  --text-3:      #88888f;
 
-  --border:      rgba(255,255,255,0.08);
-  --border-2:    rgba(255,255,255,0.14);
+  --border:      rgba(255,255,255,0.10);
+  --border-2:    rgba(255,255,255,0.18);
 
-  /* 액센트: OS가 없으면 중립 파랑 */
   --accent:      #0a84ff;
-  --accent-dim:  rgba(10,132,255,0.18);
-  --accent-text: #64b5f6;
+  --accent-dim:  rgba(10,132,255,0.20);
+  --accent-text: #5ac8fa;   /* 밝은 파랑 — 어두운 배경에서 잘 보임 */
 
-  --scrollbar:   rgba(255,255,255,0.15);
-  --placeholder: rgba(255,255,255,0.3);
+  --scrollbar:   rgba(255,255,255,0.18);
+  --placeholder: rgba(255,255,255,0.35);
   --select-bg:   #2c2c2e;
 }
 
@@ -32,19 +31,19 @@
     --bg-elevated: #e5e5ea;
     --bg-overlay:  #ffffff;
 
-    --text:        #1c1c1e;
+    --text:        #111111;   /* 충분히 어둡게 */
     --text-2:      #3a3a3c;
-    --text-3:      #aeaeb2;
+    --text-3:      #6e6e73;
 
-    --border:      rgba(0,0,0,0.08);
-    --border-2:    rgba(0,0,0,0.15);
+    --border:      rgba(0,0,0,0.10);
+    --border-2:    rgba(0,0,0,0.18);
 
     --accent:      #007aff;
     --accent-dim:  rgba(0,122,255,0.12);
-    --accent-text: #0055cc;
+    --accent-text: #0040cc;   /* 어두운 파랑 — 밝은 배경에서 잘 보임 */
 
-    --scrollbar:   rgba(0,0,0,0.18);
-    --placeholder: rgba(0,0,0,0.3);
+    --scrollbar:   rgba(0,0,0,0.20);
+    --placeholder: rgba(0,0,0,0.35);
     --select-bg:   #f2f2f7;
   }
 }
