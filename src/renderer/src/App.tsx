@@ -16,13 +16,14 @@ export default function App(): React.ReactElement {
   const [editTarget, setEditTarget] = useState<import('./types').SchemaEntry | undefined>(undefined)
 
   // 스키마가 추가됐을 때만 fallback 행들 재탐색 초기화
-  const prevSchemaCountRef = useRef(schemas.length)
+  // 스키마 목록이 변경될 때마다 (추가·수정·삭제) 모든 행 캐시 초기화
+  const prevSchemasRef = useRef(schemas)
   useEffect(() => {
-    if (schemas.length > prevSchemaCountRef.current) {
+    if (prevSchemasRef.current !== schemas) {
       resetFallbackSchemaIds()
     }
-    prevSchemaCountRef.current = schemas.length
-  }, [schemas.length, resetFallbackSchemaIds])
+    prevSchemasRef.current = schemas
+  }, [schemas, resetFallbackSchemaIds])
 
   const selectedRow = selectedIndex !== null ? filteredRows[selectedIndex] ?? null : null
 

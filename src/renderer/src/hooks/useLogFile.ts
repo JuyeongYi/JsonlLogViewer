@@ -81,10 +81,10 @@ export function useLogFile() {
     }))
   }, [])
 
-  // 스키마가 추가됐을 때 fallback 캐시를 초기화해 재탐색 유도
+  // 스키마 목록 변경 시 모든 행의 캐시를 초기화해 재탐색 유도
   const resetFallbackSchemaIds = useCallback(() => {
     setState(prev => {
-      prev.rows.forEach(r => { if (r._schemaId === '') r._schemaId = null })
+      prev.rows.forEach(r => { r._schemaId = null })
       return { ...prev }
     })
   }, [])
