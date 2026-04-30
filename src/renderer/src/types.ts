@@ -28,7 +28,10 @@ export interface Tab {
 declare global {
   interface Window {
     windowApi: {
-      setTitle: (title: string) => void
+      setTitle:         (title: string) => void
+      minimize:         () => void
+      toggleMaximize:   () => void
+      toggleFullscreen: () => void
     }
     fileApi: {
       openFile: () => Promise<string | null>

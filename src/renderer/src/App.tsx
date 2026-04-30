@@ -86,6 +86,18 @@ export default function App(): React.ReactElement {
     openTab(path)
   }, [openTab])
 
+  // 창 제어 단축키 (입력 중에도 동작)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const ctrl = e.ctrlKey || e.metaKey
+      if (e.key === 'F11') { e.preventDefault(); window.windowApi?.toggleFullscreen() }
+      if (ctrl && e.key === 'm') { e.preventDefault(); window.windowApi?.minimize() }
+      if (ctrl && e.shiftKey && e.key === 'M') { e.preventDefault(); window.windowApi?.toggleMaximize() }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
   // $schema 원격 fetch 완료 시 해당 URL 사용 행의 _schemaId 초기화
   useEffect(() => {
     setRemoteSchemaCallback((schemaId) => {

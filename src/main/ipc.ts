@@ -11,6 +11,22 @@ export function registerIpcHandlers(): void {
     if (win) win.setTitle(title)
   })
 
+  ipcMain.on('window:minimize', (_event) => {
+    BrowserWindow.fromWebContents(_event.sender)?.minimize()
+  })
+
+  ipcMain.on('window:toggleMaximize', (_event) => {
+    const win = BrowserWindow.fromWebContents(_event.sender)
+    if (!win) return
+    win.isMaximized() ? win.unmaximize() : win.maximize()
+  })
+
+  ipcMain.on('window:toggleFullscreen', (_event) => {
+    const win = BrowserWindow.fromWebContents(_event.sender)
+    if (!win) return
+    win.setFullScreen(!win.isFullScreen())
+  })
+
   ipcMain.handle('file:open', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openFile'],

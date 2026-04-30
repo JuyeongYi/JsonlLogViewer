@@ -22,7 +22,10 @@ contextBridge.exposeInMainWorld('fileApi', {
 })
 
 contextBridge.exposeInMainWorld('windowApi', {
-  setTitle: (title: string) => ipcRenderer.send('window:setTitle', title),
+  setTitle:          (title: string) => ipcRenderer.send('window:setTitle', title),
+  minimize:          ()              => ipcRenderer.send('window:minimize'),
+  toggleMaximize:    ()              => ipcRenderer.send('window:toggleMaximize'),
+  toggleFullscreen:  ()              => ipcRenderer.send('window:toggleFullscreen'),
 })
 
 contextBridge.exposeInMainWorld('schemaApi', {
