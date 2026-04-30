@@ -21,6 +21,14 @@
   --scrollbar:   rgba(255,255,255,0.18);
   --placeholder: rgba(255,255,255,0.35);
   --select-bg:   #2c2c2e;
+
+  /* JSON 트리 토큰 색상 (다크) */
+  --json-string:  #4ade80;
+  --json-number:  #60a5fa;
+  --json-boolean: #f472b6;
+  --json-null:    #94a3b8;
+  --json-key:     #fbbf24;
+  --json-punct:   #6b7280;
 }
 
 /* ── 라이트 모드 ── */
@@ -45,6 +53,14 @@
     --scrollbar:   rgba(0,0,0,0.20);
     --placeholder: rgba(0,0,0,0.35);
     --select-bg:   #f2f2f7;
+
+  /* JSON 트리 토큰 색상 (라이트) */
+    --json-string:  #15803d;
+    --json-number:  #1d4ed8;
+    --json-boolean: #be185d;
+    --json-null:    #6b7280;
+    --json-key:     #92400e;
+    --json-punct:   #6b7280;
   }
 }
 

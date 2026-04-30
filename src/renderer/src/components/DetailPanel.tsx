@@ -148,8 +148,6 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
         {/* 스키마 / 에러 뱃지 */}
         {matchedSchema && <span style={{ fontSize: 10, color: 'var(--accent)', flexShrink: 0 }}>● {matchedSchema.displayName}</span>}
         {row._parseError && <span style={{ fontSize: 10, color: '#f87171', flexShrink: 0 }}>⚠ {row._parseError}</span>}
-        {/* 줄 번호 */}
-        <span style={{ fontSize: 10, opacity: 0.35, flexShrink: 0, fontFamily: 'monospace' }}>#{row._lineNumber}</span>
       </div>
         {matchedSchema?.hasViewer && (
           <button
