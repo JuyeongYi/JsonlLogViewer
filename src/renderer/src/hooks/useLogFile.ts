@@ -11,7 +11,7 @@ export interface LogFileState {
   error: string | null
 }
 
-function applyFilter(rows: LogRow[], filter: FilterState): LogRow[] {
+export function applyFilter(rows: LogRow[], filter: FilterState): LogRow[] {
   // 1. Level filter (multi-select, empty = all)
   let result = filter.levels.length === 0
     ? rows
