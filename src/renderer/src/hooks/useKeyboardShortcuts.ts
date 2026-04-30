@@ -7,6 +7,7 @@ export interface ShortcutHandlers {
   onSearchCategory: () => void // u → 카테고리 입력 포커스
   onClearMsg: () => void       // Ctrl+i → msg 입력 비우기
   onClearCategory: () => void  // Ctrl+u → 카테고리 입력 비우기
+  onToggleSort: () => void     // t → 시간 정렬 토글
   onToggleError: () => void    // Ctrl+q → error 토글
   onToggleWarn: () => void     // Ctrl+w → warn 토글
   onToggleInfo: () => void     // Ctrl+e → info 토글
@@ -32,6 +33,7 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
         if (e.key === '[') { e.preventDefault(); handlers.onPrevTab() }
         if (e.key === '}') { e.preventDefault(); handlers.onNextView() }
         if (e.key === '{') { e.preventDefault(); handlers.onPrevView() }
+        if (e.key === 't') { e.preventDefault(); handlers.onToggleSort() }
         if (e.key === 'i' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchMsg() }
         if (e.key === 'u' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchCategory() }
         if (e.key === 'Escape') { e.preventDefault(); handlers.onCloseDetail() }
