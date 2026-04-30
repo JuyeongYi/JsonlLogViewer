@@ -1,5 +1,5 @@
 // src/renderer/src/components/LogList.tsx
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { LogRow as LogRowType } from '../types'
 import { LogRow } from './LogRow'
@@ -20,6 +20,13 @@ export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: Log
     estimateSize: () => 28,
     overscan: 20,
   })
+
+  // 키보드 이동 시 선택된 행이 화면 밖으로 나가면 자동 스크롤
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      virtualizer.scrollToIndex(selectedIndex, { align: 'auto' })
+    }
+  }, [selectedIndex])
 
   if (rows.length === 0) {
     return (
