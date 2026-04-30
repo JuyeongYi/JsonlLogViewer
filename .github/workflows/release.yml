@@ -53,8 +53,9 @@ jobs:
 
       # ── 결과물 목록 확인 ─────────────────────────────────
       - name: List dist
-        run: Get-ChildItem dist -Filter "*.exe","*.zip" | Select-Object Name, Length
+        run: Get-ChildItem dist | Where-Object { $_.Extension -in '.exe','.zip' } | Select-Object Name, Length
         shell: pwsh
+        continue-on-error: true
 
       # ── 둘 다 업로드 (있는 것만) ─────────────────────────
       - name: Create GitHub Release
