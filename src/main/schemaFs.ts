@@ -11,7 +11,7 @@ export interface SchemaSummary {
 export function getUserDataDir(): string {
   const appData = process.env.APPDATA
   if (!appData) throw new Error('APPDATA 환경 변수가 설정되지 않았습니다 (Windows 전용)')
-  return join(appData, 'jsonllogviewer-scaffold')
+  return join(appData, 'jsonllogviewer')
 }
 
 export function getSchemasDir(): string {

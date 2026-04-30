@@ -1,5 +1,5 @@
 {
-  "name": "jsonllogviewer-scaffold",
+  "name": "jsonllogviewer",
   "version": "1.0.0",
   "description": "JSONL 로그 파일 데스크톱 뷰어",
   "main": "./out/main/index.js",

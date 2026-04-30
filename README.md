@@ -52,7 +52,7 @@ npm test
 
 ## 스키마 플러그인
 
-스키마는 `%APPDATA%/jsonllogviewer-scaffold/schemas/<id>/` 에 저장됩니다.
+스키마는 `%APPDATA%/jsonllogviewer/schemas/<id>/` 에 저장됩니다.
 
 ```
 schemas/
