@@ -2,6 +2,7 @@ export interface LogRow {
   _lineNumber: number
   _raw: string
   _parseError?: string   // 설정 시 경고 아이콘 표시
+  _schemaId: string | null  // null=미검증, ''=미발견(fallback), '<id>'=매칭된 스키마
   timestamp?: string | number
   level?: string
   msg?: string

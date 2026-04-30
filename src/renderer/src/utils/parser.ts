@@ -16,6 +16,7 @@ export function parseJsonlContent(content: string): LogRow[] {
       rows.push({
         _lineNumber: i + 1,
         _raw: line,
+        _schemaId: null,
         ...(missing.length > 0 && {
           _parseError: `Missing required fields: ${missing.join(', ')}`
         }),
@@ -25,6 +26,7 @@ export function parseJsonlContent(content: string): LogRow[] {
       rows.push({
         _lineNumber: i + 1,
         _raw: line,
+        _schemaId: null,
         _parseError: 'Invalid JSON',
       })
     }

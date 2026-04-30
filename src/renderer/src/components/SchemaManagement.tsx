@@ -1,19 +1,33 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import type { SchemaEntry } from '../types'
 
 interface SchemaManagementProps {
   schemas: Array<{ id: string; displayName: string; hasViewer: boolean }>
   onSave: (id: string, schemaJson: string, displayName: string, viewerHtml: string | null) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onClose: () => void
+  editTarget?: SchemaEntry  // 편집 모드: 해당 스키마로 폼 초기화
 }
 
-export function SchemaManagement({ schemas, onSave, onDelete, onClose }: SchemaManagementProps): React.ReactElement {
-  const [id, setId] = useState('')
-  const [displayName, setDisplayName] = useState('')
-  const [schemaJson, setSchemaJson] = useState('{\n  "type": "object",\n  "required": ["timestamp", "level", "msg"]\n}')
+export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarget }: SchemaManagementProps): React.ReactElement {
+  const isEditing = !!editTarget
+
+  const [id, setId] = useState(editTarget?.id ?? '')
+  const [displayName, setDisplayName] = useState(editTarget?.displayName ?? '')
+  const [schemaJson, setSchemaJson] = useState(
+    editTarget ? JSON.stringify(editTarget.schema, null, 2) : '{\n  "type": "object",\n  "required": ["timestamp", "level", "msg"]\n}'
+  )
   const [viewerHtml, setViewerHtml] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // 편집 모드에서 viewer.html 내용 로드
+  useEffect(() => {
+    if (!editTarget?.viewerPath) return
+    window.schemaApi.readViewer(editTarget.viewerPath).then(({ html }) => {
+      if (html) setViewerHtml(html)
+    })
+  }, [editTarget?.viewerPath])
 
   const handleSave = async () => {
     try { JSON.parse(schemaJson) } catch {
@@ -22,7 +36,11 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose }: SchemaM
     setSaving(true); setError(null)
     try {
       await onSave(id, schemaJson, displayName || id, viewerHtml || null)
-      setId(''); setDisplayName(''); setSchemaJson('{}'); setViewerHtml('')
+      if (!isEditing) {
+        setId(''); setDisplayName(''); setSchemaJson('{}'); setViewerHtml('')
+      } else {
+        onClose()
+      }
     } catch (e) { setError(String(e)) }
     finally { setSaving(false) }
   }
@@ -36,10 +54,12 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose }: SchemaM
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 560, maxHeight: '80vh', overflow: 'auto', padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h3 style={{ fontSize: 15 }}>스키마 관리</h3>
+          <h3 style={{ fontSize: 15 }}>{isEditing ? `스키마 편집 — ${editTarget.displayName}` : '스키마 관리'}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 16 }}>✕</button>
         </div>
-        {schemas.length > 0 && (
+
+        {/* 등록된 스키마 목록 (신규 등록 모드에서만 표시) */}
+        {!isEditing && schemas.length > 0 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 11, opacity: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>등록된 스키마</div>
             {schemas.map(s => (
@@ -52,16 +72,46 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose }: SchemaM
             ))}
           </div>
         )}
-        <div style={{ fontSize: 11, opacity: 0.5, marginBottom: 8, textTransform: 'uppercase' }}>새 스키마 등록</div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <input placeholder="ID (영문, 하이픈)" value={id} onChange={e => setId(e.target.value)} style={{ ...inputStyle, flex: 1 }} />
-          <input placeholder="표시 이름" value={displayName} onChange={e => setDisplayName(e.target.value)} style={{ ...inputStyle, flex: 1 }} />
+
+        <div style={{ fontSize: 11, opacity: 0.5, marginBottom: 8, textTransform: 'uppercase' }}>
+          {isEditing ? '내용 수정' : '새 스키마 등록'}
         </div>
-        <textarea rows={6} placeholder="JSON Schema" value={schemaJson} onChange={e => setSchemaJson(e.target.value)} style={{ ...inputStyle, display: 'block', marginBottom: 8, resize: 'vertical' }} />
-        <textarea rows={4} placeholder="viewer.html (선택사항)" value={viewerHtml} onChange={e => setViewerHtml(e.target.value)} style={{ ...inputStyle, display: 'block', marginBottom: 8, resize: 'vertical' }} />
+        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+          <input
+            placeholder="ID (영문, 하이픈)"
+            value={id}
+            onChange={e => setId(e.target.value)}
+            disabled={isEditing}
+            style={{ ...inputStyle, flex: 1, opacity: isEditing ? 0.5 : 1 }}
+          />
+          <input
+            placeholder="표시 이름"
+            value={displayName}
+            onChange={e => setDisplayName(e.target.value)}
+            style={{ ...inputStyle, flex: 1 }}
+          />
+        </div>
+        <textarea
+          rows={6}
+          placeholder="JSON Schema"
+          value={schemaJson}
+          onChange={e => setSchemaJson(e.target.value)}
+          style={{ ...inputStyle, display: 'block', marginBottom: 8, resize: 'vertical' }}
+        />
+        <textarea
+          rows={4}
+          placeholder="viewer.html (선택사항)"
+          value={viewerHtml}
+          onChange={e => setViewerHtml(e.target.value)}
+          style={{ ...inputStyle, display: 'block', marginBottom: 8, resize: 'vertical' }}
+        />
         {error && <div style={{ color: '#f87171', fontSize: 12, marginBottom: 8 }}>{error}</div>}
-        <button onClick={handleSave} disabled={saving || !id} style={{ background: 'rgba(99,102,241,0.3)', border: '1px solid rgba(99,102,241,0.5)', borderRadius: 4, color: '#a5b4fc', cursor: 'pointer', fontSize: 13, padding: '5px 16px' }}>
-          {saving ? '저장 중...' : '저장'}
+        <button
+          onClick={handleSave}
+          disabled={saving || !id}
+          style={{ background: 'rgba(99,102,241,0.3)', border: '1px solid rgba(99,102,241,0.5)', borderRadius: 4, color: '#a5b4fc', cursor: 'pointer', fontSize: 13, padding: '5px 16px' }}
+        >
+          {saving ? '저장 중...' : isEditing ? '저장' : '등록'}
         </button>
       </div>
     </div>

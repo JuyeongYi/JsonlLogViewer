@@ -27,14 +27,34 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
     Object.entries(row).filter(([k]) => !k.startsWith('_'))
   )
 
-  const matchedSchema = !useFallback && !row._parseError
-    ? findMatchingSchema(schemas, displayData)
-    : null
+  // 스키마 매칭 (캐시 우선)
+  let matchedSchema: SchemaEntry | null = null
+  if (!useFallback && !row._parseError) {
+    if (row._schemaId === null) {
+      // 미검증: 탐색 후 캐시
+      const result = findMatchingSchema(schemas, displayData)
+      row._schemaId = result?.id ?? ''
+      matchedSchema = result
+    } else if (row._schemaId === '') {
+      // 캐시됨: 매칭 없음
+      matchedSchema = null
+    } else {
+      // 캐시됨: ID로 조회
+      matchedSchema = schemas.find(s => s.id === row._schemaId) ?? null
+      if (!matchedSchema) {
+        // 스키마가 삭제된 경우: 재탐색
+        const result = findMatchingSchema(schemas, displayData)
+        row._schemaId = result?.id ?? ''
+        matchedSchema = result
+      }
+    }
+  }
 
   const showViewer = !!(matchedSchema?.hasViewer && !useFallback)
 
   return (
     <div style={{ height: 200, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '4px 12px', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
         <span style={{ fontSize: 11, opacity: 0.5, flex: 1 }}>
           줄 #{row._lineNumber}
@@ -48,13 +68,26 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
         )}
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 14, padding: '0 4px' }}>✕</button>
       </div>
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        {showViewer ? (
-          <SchemaViewer row={row} schema={matchedSchema!} onFallback={() => setUseFallback(true)} />
-        ) : row._parseError === 'Invalid JSON' ? (
-          <pre style={{ padding: 12, margin: 0, color: '#f87171', wordBreak: 'break-all', whiteSpace: 'pre-wrap', fontSize: 13, fontFamily: 'monospace' }}>{row._raw}</pre>
+
+      {/* 콘텐츠 */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+        {row._parseError === 'Invalid JSON' ? (
+          <pre style={{ flex: 1, padding: 12, margin: 0, color: '#f87171', wordBreak: 'break-all', whiteSpace: 'pre-wrap', fontSize: 13, fontFamily: 'monospace', overflow: 'auto' }}>
+            {row._raw}
+          </pre>
+        ) : showViewer ? (
+          // 스키마 매칭: 좌측 iframe 뷰어 + 우측 JSON 트리
+          <>
+            <div style={{ flex: 1, overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+              <SchemaViewer row={row} schema={matchedSchema!} onFallback={() => setUseFallback(true)} />
+            </div>
+            <div style={{ width: 280, overflow: 'auto', padding: 10, fontSize: 12, fontFamily: 'monospace', flexShrink: 0 }}>
+              <JsonTree data={displayData} />
+            </div>
+          </>
         ) : (
-          <div style={{ padding: 12, fontSize: 13, fontFamily: 'monospace' }}>
+          // 폴백: JSON 트리만
+          <div style={{ flex: 1, overflow: 'auto', padding: 12, fontSize: 13, fontFamily: 'monospace' }}>
             <JsonTree data={displayData} />
           </div>
         )}

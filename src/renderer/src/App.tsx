@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './styles/app.css'
 import { useLogFile } from './hooks/useLogFile'
 import { useSchemaRegistry } from './hooks/useSchemaRegistry'
@@ -9,10 +9,20 @@ import { Sidebar } from './components/Sidebar'
 import { SchemaManagement } from './components/SchemaManagement'
 
 export default function App(): React.ReactElement {
-  const { path, rows, filteredRows, filter, isLoading, error, openFile, setFilter } = useLogFile()
+  const { path, rows, filteredRows, filter, isLoading, error, openFile, setFilter, resetFallbackSchemaIds } = useLogFile()
   const { schemas, saveSchema, deleteSchema } = useSchemaRegistry()
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [showSchemaManagement, setShowSchemaManagement] = useState(false)
+  const [editTarget, setEditTarget] = useState<import('./types').SchemaEntry | undefined>(undefined)
+
+  // 스키마가 추가됐을 때만 fallback 행들 재탐색 초기화
+  const prevSchemaCountRef = useRef(schemas.length)
+  useEffect(() => {
+    if (schemas.length > prevSchemaCountRef.current) {
+      resetFallbackSchemaIds()
+    }
+    prevSchemaCountRef.current = schemas.length
+  }, [schemas.length, resetFallbackSchemaIds])
 
   const selectedRow = selectedIndex !== null ? filteredRows[selectedIndex] ?? null : null
 
@@ -42,7 +52,12 @@ export default function App(): React.ReactElement {
 
       {/* 메인 영역: Sidebar + 리스트 */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <Sidebar schemas={schemas} onOpenSchemaManagement={() => setShowSchemaManagement(true)} />
+        <Sidebar
+          schemas={schemas}
+          onOpenSchemaManagement={() => { setEditTarget(undefined); setShowSchemaManagement(true) }}
+          onEditSchema={s => { setEditTarget(s); setShowSchemaManagement(true) }}
+          onDeleteSchema={deleteSchema}
+        />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
             <LogList
@@ -65,7 +80,8 @@ export default function App(): React.ReactElement {
           schemas={schemas}
           onSave={saveSchema}
           onDelete={deleteSchema}
-          onClose={() => setShowSchemaManagement(false)}
+          onClose={() => { setShowSchemaManagement(false); setEditTarget(undefined) }}
+          editTarget={editTarget}
         />
       )}
     </div>

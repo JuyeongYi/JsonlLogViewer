@@ -75,5 +75,13 @@ export function useLogFile() {
     }))
   }, [])
 
-  return { ...state, openFile, setFilter }
+  // 스키마가 추가됐을 때 fallback 캐시를 초기화해 재탐색 유도
+  const resetFallbackSchemaIds = useCallback(() => {
+    setState(prev => {
+      prev.rows.forEach(r => { if (r._schemaId === '') r._schemaId = null })
+      return { ...prev }
+    })
+  }, [])
+
+  return { ...state, openFile, setFilter, resetFallbackSchemaIds }
 }
