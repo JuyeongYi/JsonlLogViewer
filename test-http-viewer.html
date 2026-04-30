@@ -1,0 +1,147 @@
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f0f1a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 12px; font-size: 13px; line-height: 1.5; }
+
+.top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.badge { padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; letter-spacing: .03em; }
+.m-GET    { background: rgba(74,222,128,.2);  color: #4ade80; }
+.m-POST   { background: rgba(251,191,36,.2);  color: #fbbf24; }
+.m-PUT    { background: rgba(129,140,248,.2); color: #818cf8; }
+.m-DELETE { background: rgba(248,113,113,.2); color: #f87171; }
+.m-PATCH  { background: rgba(251,146,60,.2);  color: #fb923c; }
+.s-2xx { background: rgba(74,222,128,.15);  color: #4ade80; }
+.s-3xx { background: rgba(129,140,248,.15); color: #818cf8; }
+.s-4xx { background: rgba(251,191,36,.15);  color: #fbbf24; }
+.s-5xx { background: rgba(248,113,113,.15); color: #f87171; }
+
+.path     { font-family: monospace; font-size: 14px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta     { font-size: 11px; color: #64748b; white-space: nowrap; }
+
+.section  { margin-bottom: 14px; }
+.sec-title { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #64748b; margin-bottom: 6px; }
+
+/* Timing waterfall */
+.wf-wrap  { background: rgba(255,255,255,.03); border-radius: 6px; padding: 10px 12px; }
+.wf-row   { display: grid; grid-template-columns: 72px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 5px; font-size: 11px; }
+.wf-row:last-child { margin: 0; }
+.wf-label { color: #64748b; }
+.wf-bg    { background: rgba(255,255,255,.07); border-radius: 3px; height: 12px; overflow: hidden; }
+.wf-bar   { height: 12px; border-radius: 3px; transition: width .3s; }
+.wf-ms    { text-align: right; color: #93c5fd; font-family: monospace; }
+
+/* Headers */
+.hdr-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hdr-box   { background: rgba(255,255,255,.04); border-radius: 6px; padding: 8px 10px; }
+.hdr-title { font-size: 10px; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
+.hdr-row   { display: flex; gap: 8px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 11px; }
+.hdr-row:last-child { border: none; }
+.hk        { color: #94a3b8; min-width: 110px; flex-shrink: 0; }
+.hv        { color: #e2e8f0; word-break: break-all; }
+
+/* Error */
+.err-box   { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 6px; padding: 10px 14px; }
+.err-code  { color: #f87171; font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.err-msg   { color: #fca5a5; font-size: 12px; }
+.err-trace { color: #64748b; font-size: 11px; margin-top: 6px; font-family: monospace; }
+
+/* Misc */
+.tag { display: inline-block; background: rgba(129,140,248,.15); color: #a5b4fc; border-radius: 3px; padding: 1px 7px; font-size: 11px; }
+</style>
+
+<div id="root"><div style="opacity:.3;padding:20px">데이터 로딩 중...</div></div>
+
+<script>
+var METHOD_CLASS = { GET:'m-GET', POST:'m-POST', PUT:'m-PUT', DELETE:'m-DELETE', PATCH:'m-PATCH' };
+var WF_COLORS    = { dns:'#818cf8', connect:'#4ade80', ttfb:'#fbbf24', transfer:'#f87171' };
+var WF_LABELS    = { dns:'DNS', connect:'Connect', ttfb:'TTFB', transfer:'Transfer' };
+
+function statusClass(s) {
+  if (s >= 500) return 's-5xx';
+  if (s >= 400) return 's-4xx';
+  if (s >= 300) return 's-3xx';
+  return 's-2xx';
+}
+
+function fmtSize(bytes) {
+  if (!bytes) return '';
+  return bytes >= 1024 ? (bytes / 1024).toFixed(1) + ' KB' : bytes + ' B';
+}
+
+function renderWaterfall(timing, total) {
+  if (!timing) return '';
+  var rows = Object.entries(timing).map(function(pair) {
+    var k = pair[0], v = pair[1];
+    var pct = total > 0 ? Math.min(100, (v / total) * 100) : 0;
+    var color = WF_COLORS[k] || '#94a3b8';
+    var label = WF_LABELS[k] || k;
+    return '<div class="wf-row">' +
+      '<span class="wf-label">' + label + '</span>' +
+      '<div class="wf-bg"><div class="wf-bar" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+      '<span class="wf-ms">' + v + ' ms</span>' +
+    '</div>';
+  }).join('');
+  return '<div class="wf-wrap">' + rows + '</div>';
+}
+
+function renderHeaderBox(headers, title) {
+  if (!headers) return '';
+  var keys = Object.keys(headers);
+  if (!keys.length) return '';
+  var rows = keys.map(function(k) {
+    return '<div class="hdr-row"><span class="hk">' + k + '</span><span class="hv">' + headers[k] + '</span></div>';
+  }).join('');
+  return '<div class="hdr-box"><div class="hdr-title">' + title + '</div>' + rows + '</div>';
+}
+
+window.addEventListener('message', function(e) {
+  if (e.data.type !== 'LOG_DATA') return;
+  var d = e.data.payload;
+
+  var ts       = d.timestamp ? new Date(d.timestamp).toLocaleString('ko-KR') : '';
+  var mClass   = METHOD_CLASS[d.method] || 'm-GET';
+  var sClass   = statusClass(Number(d.status_code));
+  var size     = fmtSize(d.response_size_bytes);
+  var duration = (d.duration_ms || 0) + ' ms';
+
+  // 타이밍 바
+  var wfHtml = d.timing
+    ? '<div class="section"><div class="sec-title">타이밍 분석 (총 ' + d.duration_ms + ' ms)</div>' + renderWaterfall(d.timing, d.duration_ms) + '</div>'
+    : '';
+
+  // 헤더
+  var reqBox = renderHeaderBox(d.request_headers, '요청 헤더');
+  var resBox = renderHeaderBox(d.response_headers, '응답 헤더');
+  var hdrHtml = (reqBox || resBox)
+    ? '<div class="section"><div class="sec-title">헤더</div><div class="hdr-grid">' + (reqBox || '') + (resBox || '') + '</div></div>'
+    : '';
+
+  // 에러
+  var errHtml = '';
+  if (d.error) {
+    errHtml = '<div class="section"><div class="sec-title">오류 상세</div><div class="err-box">' +
+      '<div class="err-code">' + d.error.code + '</div>' +
+      '<div class="err-msg">' + d.error.message + '</div>' +
+      (d.error.trace_id ? '<div class="err-trace">trace_id: ' + d.error.trace_id + '</div>' : '') +
+      '</div></div>';
+  }
+
+  // 기타 필드
+  var skip = new Set(['timestamp','level','msg','method','path','status_code','duration_ms','timing','request_headers','response_headers','response_size_bytes','client_ip','error','category']);
+  var extras = Object.entries(d).filter(function(pair) { return !skip.has(pair[0]); });
+  var extraHtml = extras.length ? '<div class="section"><div class="sec-title">추가 정보</div>' +
+    extras.map(function(pair) {
+      var k = pair[0], v = pair[1];
+      return '<span class="tag" style="margin:2px">' + k + ': ' + JSON.stringify(v) + '</span>';
+    }).join('') + '</div>' : '';
+
+  document.getElementById('root').innerHTML =
+    '<div class="top">' +
+      '<span class="badge ' + mClass + '">' + (d.method || '') + '</span>' +
+      '<span class="badge ' + sClass + '">' + (d.status_code || '') + '</span>' +
+      '<span class="path">' + (d.path || '') + '</span>' +
+      '<span class="meta">' + duration + (size ? ' · ' + size : '') + ' · ' + (d.client_ip || '') + '</span>' +
+      '<span class="meta" style="opacity:.4">' + ts + '</span>' +
+    '</div>' +
+    wfHtml + hdrHtml + errHtml + extraHtml;
+});
+</script>
