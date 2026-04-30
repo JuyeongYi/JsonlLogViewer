@@ -1,21 +1,25 @@
-# JsonlLogViewer 빌드 및 설치 스크립트
+# JsonlLogViewer 빌드 스크립트
 #
 # 사용법:
-#   .\install.ps1          → 빌드 + NSIS 설치 파일(.exe) 생성
-#   .\install.ps1 -DevOnly → 의존성 설치만
-#   .\install.ps1 -Run     → 개발 서버 실행
+#   .\install.ps1              → 빌드 + 실행 파일 생성 (dist\win-unpacked\jllv.exe)
+#   .\install.ps1 -Installer   → 빌드 + NSIS 설치 파일(.exe) 생성
+#                                ※ Windows 개발자 모드 필요 (설정 → 개인 정보 및 보안 → 개발자용 → 개발자 모드 ON)
+#   .\install.ps1 -DevOnly     → 의존성 설치만
+#   .\install.ps1 -Run         → 개발 서버 실행
 
 param(
+    [switch]$Installer,
     [switch]$DevOnly,
     [switch]$Run
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProgressPreference = 'SilentlyContinue'   # 다운로드 속도 개선
 
 function Write-Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 function Write-Ok($msg)   { Write-Host "  ✓ $msg" -ForegroundColor Green }
+function Write-Warn($msg) { Write-Host "  ! $msg" -ForegroundColor Yellow }
 function Write-Fail($msg) { Write-Host "  ✗ $msg" -ForegroundColor Red; exit 1 }
 
 # ── Node.js 확인 ──────────────────────────────────────────
@@ -37,58 +41,43 @@ Write-Ok "완료"
 if ($DevOnly) { exit 0 }
 if ($Run) { Write-Step "개발 서버 실행"; npm run dev; exit 0 }
 
-# ── winCodeSign 사전 캐시 ─────────────────────────────────
-# electron-builder가 NSIS 빌드 시 winCodeSign을 요구하지만
-# 7z 안에 macOS 심볼릭 링크가 있어 권한 오류 발생.
-# → -snl (skip symbolic links) 옵션으로 직접 추출해 캐시에 배치.
-function Ensure-WinCodeSign {
-    $ver      = "2.6.0"
-    $cacheDir = "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign\winCodeSign-$ver"
-    $7za      = Join-Path $ScriptDir "node_modules\7zip-bin\win\x64\7za.exe"
-
-    if (Test-Path (Join-Path $cacheDir "win")) {
-        Write-Ok "winCodeSign 캐시 존재 (건너뜀)"
-        return
-    }
-
-    Write-Host "  winCodeSign 다운로드 및 추출 중..." -ForegroundColor Gray
-    New-Item -ItemType Directory -Force $cacheDir | Out-Null
-
-    $url = "https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-$ver/winCodeSign-$ver.7z"
-    $tmp = "$env:TEMP\winCodeSign-$ver.7z"
-
-    # Invoke-WebRequest의 progress bar가 속도를 크게 저하시키므로 비활성화
-    $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing -TimeoutSec 120
-    $ProgressPreference = 'Continue'
-
-    # -snl: 심볼릭 링크 건너뜀 (macOS 전용, Windows 빌드에 불필요)
-    & $7za x -snl -bd $tmp "-o$cacheDir" | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Fail "winCodeSign 추출 실패" }
-
-    Remove-Item $tmp -ErrorAction SilentlyContinue
-    Write-Ok "winCodeSign 캐시 완료"
-}
-
-Write-Step "빌드 도구 캐시 확인"
-Ensure-WinCodeSign
-
 # ── 앱 빌드 ─────────────────────────────────────────────
 Write-Step "앱 빌드"
 npm run build
 if ($LASTEXITCODE -ne 0) { Write-Fail "빌드 실패" }
 Write-Ok "빌드 완료"
 
-# ── NSIS 설치 파일 생성 ───────────────────────────────────
-Write-Step "설치 파일 생성 (NSIS .exe)"
-$env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
-npx electron-builder --win
-Remove-Item Env:\CSC_IDENTITY_AUTO_DISCOVERY -ErrorAction SilentlyContinue
+# ── 패키징 ───────────────────────────────────────────────
+if ($Installer) {
+    # NSIS 설치 파일 — Windows 개발자 모드 필요
+    Write-Step "NSIS 설치 파일 생성"
+    Write-Warn "개발자 모드가 활성화되어 있어야 합니다."
+    Write-Warn "설정 → 개인 정보 및 보안 → 개발자용 → 개발자 모드 ON"
 
-if ($LASTEXITCODE -ne 0) { Write-Fail "패키징 실패" }
+    $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
+    npx electron-builder --win
+    Remove-Item Env:\CSC_IDENTITY_AUTO_DISCOVERY -ErrorAction SilentlyContinue
 
-$installer = Get-ChildItem "dist" -Filter "*-setup.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($installer) {
-    Write-Ok "설치 파일 생성 완료"
-    Write-Host "`n  ▶ dist\$($installer.Name)" -ForegroundColor Yellow
+    if ($LASTEXITCODE -ne 0) { Write-Fail "패키징 실패 — 개발자 모드를 활성화하고 재시도하세요" }
+
+    $installer = Get-ChildItem "dist" -Filter "*-setup.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($installer) {
+        Write-Ok "설치 파일: dist\$($installer.Name)"
+        Write-Host "`n  ▶ dist\$($installer.Name)" -ForegroundColor Yellow
+    }
+} else {
+    # --dir: 코드 서명 없이 실행 파일만 생성 (개발자 모드 불필요)
+    Write-Step "실행 파일 생성 (서명·설치 파일 없음)"
+    $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
+    npx electron-builder --dir
+    Remove-Item Env:\CSC_IDENTITY_AUTO_DISCOVERY -ErrorAction SilentlyContinue
+
+    if ($LASTEXITCODE -ne 0) { Write-Fail "패키징 실패" }
+
+    $exe = Get-ChildItem "dist\win-unpacked" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($exe) {
+        Write-Ok "실행 파일: dist\win-unpacked\$($exe.Name)"
+        Write-Host "`n  ▶ dist\win-unpacked\$($exe.Name)" -ForegroundColor Yellow
+        Write-Host "  설치 파일 생성: .\install.ps1 -Installer  (개발자 모드 필요)" -ForegroundColor DarkGray
+    }
 }
