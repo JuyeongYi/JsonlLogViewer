@@ -1,7 +1,0 @@
-{"timestamp":"2024-01-01T10:00:00Z","level":"info","msg":"서버 시작","port":8080}
-{"timestamp":"2024-01-01T10:00:01Z","level":"error","msg":"DB 연결 실패","host":"db-01","retries":3}
-{"timestamp":"2024-01-01T10:00:02Z","level":"warn","msg":"메모리 사용량 높음","used_mb":1800}
-{"timestamp":"2024-01-01T10:00:03Z","level":"info","msg":"재연결 성공"}
-{"timestamp":"2024-01-01T10:00:04Z","level":"debug","msg":"헬스체크","ok":true}
-not valid json
-{"missing_required":"fields"}
