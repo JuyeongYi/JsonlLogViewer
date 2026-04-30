@@ -31,3 +31,6 @@ not valid json
 {"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}
 {"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}
 {"timestamp":"2026-04-30T15:20:00Z","level":"error","msg":"tail 테스트","category":"test"}
+{"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}
+{"timestamp":"2026-04-30T15:20:00Z","level":"error","msg":"tail 테스트","category":"test"}
+{"timestamp":"2026-04-30T15:20:00Z","level":"error","msg":"tail 테스트","category":"test"}
