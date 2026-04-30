@@ -33,7 +33,7 @@ export function LogList({ rows, selectedIndex, onSelect }: LogListProps): React.
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '90px 60px 1fr',
+          gridTemplateColumns: '90px 60px 110px 1fr',
           gap: 8,
           padding: '4px 12px',
           fontSize: 11,
@@ -49,6 +49,7 @@ export function LogList({ rows, selectedIndex, onSelect }: LogListProps): React.
       >
         <span>Timestamp</span>
         <span>Level</span>
+        <span>Category</span>
         <span>Message</span>
       </div>
 

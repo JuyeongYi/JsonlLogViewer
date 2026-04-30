@@ -26,7 +26,7 @@ export function LogRow({ row, isSelected, onClick }: LogRowProps): React.ReactEl
       onClick={onClick}
       style={{
         display: 'grid',
-        gridTemplateColumns: '90px 60px 1fr auto',
+        gridTemplateColumns: '90px 60px 110px 1fr auto',
         gap: 8,
         padding: '3px 12px',
         cursor: 'pointer',
@@ -42,6 +42,9 @@ export function LogRow({ row, isSelected, onClick }: LogRowProps): React.ReactEl
       </span>
       <span style={{ color: levelColor, fontWeight: 600, textTransform: 'uppercase', fontSize: 11 }}>
         {String(row.level ?? '—')}
+      </span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.65, fontSize: 11 }}>
+        {row.category != null ? String(row.category) : ''}
       </span>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {String(row.msg ?? row._raw)}
