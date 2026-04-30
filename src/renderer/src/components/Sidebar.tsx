@@ -25,7 +25,15 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
 
   return (
     <div style={{ width: 180, borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', flexShrink: 0, background: 'rgba(255,255,255,0.02)', position: 'relative' }}>
-      <div style={{ padding: '10px 12px', fontSize: 11, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>스키마</div>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '6px 8px 6px 12px', gap: 6 }}>
+        <button
+          onClick={onOpenSchemaManagement}
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '2px 8px', flexShrink: 0 }}
+        >
+          관리
+        </button>
+        <span style={{ fontSize: 11, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>스키마</span>
+      </div>
       <div style={{ flex: 1, overflow: 'auto' }}>
         {schemas.length === 0 ? (
           <div style={{ padding: '4px 12px', fontSize: 12, opacity: 0.3 }}>등록된 스키마 없음</div>
@@ -41,12 +49,6 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
           </div>
         ))}
       </div>
-      <button
-        onClick={onOpenSchemaManagement}
-        style={{ margin: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 12, padding: '5px 0' }}
-      >
-        + 스키마 관리
-      </button>
 
       {/* 우클릭 컨텍스트 메뉴 */}
       {contextMenu && (
