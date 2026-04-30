@@ -88,9 +88,12 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
           {matchedSchema && <span style={{ color: '#818cf8', marginLeft: 8 }}>● {matchedSchema.displayName}</span>}
           {row._parseError && <span style={{ color: '#f87171', marginLeft: 8 }}>⚠ {row._parseError}</span>}
         </span>
-        {showViewer && (
-          <button onClick={() => setUseFallback(true)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 11, marginRight: 8 }}>
-            JSON 트리로 보기
+        {matchedSchema?.hasViewer && (
+          <button
+            onClick={() => setUseFallback(f => !f)}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 11, marginRight: 8 }}
+          >
+            {useFallback ? '↩ 뷰어로 복구' : 'JSON 트리로 보기'}
           </button>
         )}
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 14, padding: '0 4px' }}>✕</button>
