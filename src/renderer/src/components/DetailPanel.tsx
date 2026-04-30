@@ -14,24 +14,41 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
   const [useFallback, setUseFallback] = useState(false)
   const handleFallback = useCallback(() => setUseFallback(true), [])
 
+  // 드래그 중 iframe 이벤트 가로채기 방지용 오버레이
+  const [dragCursor, setDragCursor] = useState<'ns-resize' | 'ew-resize' | null>(null)
+
+  function startDrag(
+    cursor: 'ns-resize' | 'ew-resize',
+    onMove: (ev: MouseEvent) => void,
+    onDone: () => void
+  ) {
+    setDragCursor(cursor)
+    const handleMove = (ev: MouseEvent) => onMove(ev)
+    const handleUp = () => {
+      setDragCursor(null)
+      onDone()
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseup', handleUp)
+    }
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('mouseup', handleUp)
+  }
+
   // 세로 드래그 (패널 높이)
   const [panelHeight, setPanelHeight] = useState(280)
   const vDragRef = useRef<{ startY: number; startH: number } | null>(null)
 
   const onVDragStart = (e: React.MouseEvent) => {
     vDragRef.current = { startY: e.clientY, startH: panelHeight }
-    const onMove = (ev: MouseEvent) => {
-      if (!vDragRef.current) return
-      const delta = vDragRef.current.startY - ev.clientY
-      setPanelHeight(Math.max(120, Math.min(window.innerHeight * 0.75, vDragRef.current.startH + delta)))
-    }
-    const onUp = () => {
-      vDragRef.current = null
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
+    startDrag(
+      'ns-resize',
+      (ev) => {
+        if (!vDragRef.current) return
+        const delta = vDragRef.current.startY - ev.clientY
+        setPanelHeight(Math.max(120, Math.min(window.innerHeight * 0.75, vDragRef.current.startH + delta)))
+      },
+      () => { vDragRef.current = null }
+    )
   }
 
   // 가로 드래그 (뷰어|JSON 트리 너비)
@@ -41,18 +58,15 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
   const onHDragStart = (e: React.MouseEvent) => {
     e.preventDefault()
     hDragRef.current = { startX: e.clientX, startW: jsonTreeWidth }
-    const onMove = (ev: MouseEvent) => {
-      if (!hDragRef.current) return
-      const delta = hDragRef.current.startX - ev.clientX
-      setJsonTreeWidth(Math.max(100, Math.min(600, hDragRef.current.startW + delta)))
-    }
-    const onUp = () => {
-      hDragRef.current = null
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
+    startDrag(
+      'ew-resize',
+      (ev) => {
+        if (!hDragRef.current) return
+        const delta = hDragRef.current.startX - ev.clientX
+        setJsonTreeWidth(Math.max(100, Math.min(600, hDragRef.current.startW + delta)))
+      },
+      () => { hDragRef.current = null }
+    )
   }
 
   useEffect(() => { setUseFallback(false) }, [row])
@@ -91,6 +105,15 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
   const showViewer = !!(matchedSchema?.hasViewer && !useFallback)
 
   return (
+    <>
+    {/* 드래그 중 iframe 이벤트 차단 오버레이 */}
+    {dragCursor && (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        cursor: dragCursor,
+        // 투명하지만 포인터 이벤트는 받음 → iframe이 이벤트를 가로채지 못함
+      }} />
+    )}
     <div style={{ height: panelHeight, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
       {/* 드래그 핸들 (세로) */}
       <div
@@ -145,5 +168,6 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
         )}
       </div>
     </div>
+    </>
   )
 }
