@@ -35,7 +35,7 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
   }
 
   // 세로 드래그 (패널 높이)
-  const [panelHeight, setPanelHeight] = useState(280)
+  const [panelHeight, setPanelHeight] = useState(() => Math.floor(window.innerHeight / 2))
   const vDragRef = useRef<{ startY: number; startH: number } | null>(null)
 
   const onVDragStart = (e: React.MouseEvent) => {
