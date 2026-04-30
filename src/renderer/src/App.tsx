@@ -33,7 +33,19 @@ export default function App(): React.ReactElement {
   const [tabStates, setTabStates] = useState<Map<string, LogFileState>>(new Map())
   const [selectedIndexes, setSelectedIndexes] = useState<Map<string, number | null>>(new Map())
 
-  const [newRowTabs, setNewRowTabs] = useState<Set<string>>(new Set())
+  const [newRowTabs, setNewRowTabs] = useState<Map<string, 'error'|'warn'|'info'>>(new Map())
+
+  // 새 행들의 최고 레벨 계산 (debug는 null 반환 → 점 표시 안 함)
+  const calcDotLevel = (rows: import('./types').LogRow[]): 'error'|'warn'|'info'|null => {
+    let level: 'error'|'warn'|'info'|null = null
+    for (const r of rows) {
+      const lv = String(r.level ?? '').toLowerCase()
+      if (lv === 'error') return 'error'
+      if (lv === 'warn' || lv === 'warning') level = 'warn'
+      else if (lv !== 'debug' && !level) level = 'info'
+    }
+    return level
+  }
   const [showSchemaManagement, setShowSchemaManagement] = useState(false)
   const [editTarget, setEditTarget] = useState<SchemaEntry | undefined>(undefined)
   const [rowMenu, setRowMenu] = useState<{ x: number; y: number; row: LogRow } | null>(null)
@@ -92,6 +104,7 @@ export default function App(): React.ReactElement {
     closeTab(id)
     setTabStates(prev => { const next = new Map(prev); next.delete(id); return next })
     setSelectedIndexes(prev => { const next = new Map(prev); next.delete(id); return next })
+    setNewRowTabs(prev => { const next = new Map(prev); next.delete(id); return next })
   }, [tabs, closeTab])
 
   // 실시간 tail: file:append 이벤트 수신
@@ -111,13 +124,18 @@ export default function App(): React.ReactElement {
           filteredRows: applyFilter(combined, state.filter),
         })
       })
-      // 비활성 탭에만 발광 점 표시
-      setNewRowTabs(prev => {
-        if (tab.id === activeTabId) return prev
-        const next = new Set(prev)
-        next.add(tab.id)
-        return next
-      })
+      // 비활성 탭에만 발광 점 표시 (debug 제외, 기존보다 높은 레벨로 업데이트)
+      if (tab.id !== activeTabId) {
+        const incoming = calcDotLevel(newRows)
+        if (incoming) {
+          setNewRowTabs(prev => {
+            const PRIORITY = { error: 3, warn: 2, info: 1 } as const
+            const existing = prev.get(tab.id)
+            const keep = existing && PRIORITY[existing] >= PRIORITY[incoming] ? existing : incoming
+            return new Map(prev).set(tab.id, keep)
+          })
+        }
+      }
     })
     return unsubscribe
   }, [tabs, activeTabId])
@@ -247,7 +265,7 @@ export default function App(): React.ReactElement {
         onSelect={id => {
           setActiveTabId(id)
           setRowMenu(null)
-          setNewRowTabs(prev => { const next = new Set(prev); next.delete(id); return next })
+          setNewRowTabs(prev => { const next = new Map(prev); next.delete(id); return next })
         }}
         onClose={handleCloseTab}
         onOpen={handleOpenFile}

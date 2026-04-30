@@ -28,3 +28,4 @@ not valid json
 {"timestamp":"2026-04-30T06:15:42Z","level":"info","msg":"실시간 tail 테스트 — 현재 시각","category":"test","added_at":"15:15:42"}
 {"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}
 {"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}
+{"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}

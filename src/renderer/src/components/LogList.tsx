@@ -30,7 +30,8 @@ export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: Log
   }
 
   return (
-    <div ref={parentRef} style={{ height: '100%', overflow: 'auto' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* 헤더: 스크롤 컨테이너 밖에 고정 */}
       <div
         style={{
           display: 'grid',
@@ -43,9 +44,8 @@ export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: Log
           letterSpacing: '0.05em',
           opacity: 0.5,
           borderBottom: '1px solid rgba(255,255,255,0.1)',
-          position: 'sticky',
-          top: 0,
           background: '#1a1a2e',
+          flexShrink: 0,
         }}
       >
         <span>Timestamp</span>
@@ -54,6 +54,8 @@ export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: Log
         <span>Message</span>
       </div>
 
+      {/* 스크롤 영역 */}
+      <div ref={parentRef} style={{ flex: 1, overflow: 'auto' }}>
       <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
         {virtualizer.getVirtualItems().map(virtualItem => (
           <div
@@ -75,6 +77,7 @@ export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: Log
             />
           </div>
         ))}
+      </div>
       </div>
     </div>
   )

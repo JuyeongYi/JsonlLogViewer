@@ -1,6 +1,12 @@
 import React from 'react'
 import type { Tab } from '../types'
 
+const LEVEL_DOT_COLORS = {
+  error: '#f87171',
+  warn:  '#fbbf24',
+  info:  '#4ade80',
+} as const
+
 // 발광 점 애니메이션 keyframes (한 번만 주입)
 const STYLE_ID = 'tab-pulse-style'
 if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
@@ -8,26 +14,27 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
   style.id = STYLE_ID
   style.textContent = `
     @keyframes tab-pulse {
-      0%,100% { box-shadow: 0 0 3px 1px #4ade80; opacity: 1; }
-      50%      { box-shadow: 0 0 7px 3px #4ade80; opacity: 0.5; }
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.35; transform: scale(0.7); }
     }
     .tab-new-dot {
       display: inline-block;
-      width: 6px; height: 6px;
+      width: 7px; height: 7px;
       border-radius: 50%;
-      background: #4ade80;
-      margin-right: 4px;
-      animation: tab-pulse 1s ease-in-out infinite;
+      margin-right: 3px;
       flex-shrink: 0;
+      animation: tab-pulse 1s ease-in-out infinite;
     }
   `
   document.head.appendChild(style)
 }
 
+type DotLevel = 'error' | 'warn' | 'info'
+
 interface TabBarProps {
   tabs: Tab[]
   activeTabId: string | null
-  newRowTabs: Set<string>
+  newRowTabs: Map<string, DotLevel>  // tabId → 최고 레벨
   onSelect: (id: string) => void
   onClose: (id: string) => void
   onOpen: () => void
@@ -37,7 +44,8 @@ export function TabBar({ tabs, activeTabId, newRowTabs, onSelect, onClose, onOpe
   return (
     <div style={{ display: 'flex', alignItems: 'center', background: '#13132a', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0, overflowX: 'auto' }}>
       {tabs.map(tab => {
-        const hasNew = newRowTabs.has(tab.id)
+        const dotLevel = newRowTabs.get(tab.id)
+        const hasNew = !!dotLevel
         const isActive = tab.id === activeTabId
         return (
           <div
@@ -52,7 +60,16 @@ export function TabBar({ tabs, activeTabId, newRowTabs, onSelect, onClose, onOpe
               fontSize: 12, flexShrink: 0,
             }}
           >
-            {hasNew && <span className="tab-new-dot" title="새 줄 추가됨" />}
+            {hasNew && dotLevel && (
+              <span
+                className="tab-new-dot"
+                title={`새 줄 추가됨 (${dotLevel})`}
+                style={{
+                  background: LEVEL_DOT_COLORS[dotLevel],
+                  boxShadow: `0 0 5px 2px ${LEVEL_DOT_COLORS[dotLevel]}`,
+                }}
+              />
+            )}
             <span>{tab.label}</span>
             <button
               onClick={e => { e.stopPropagation(); onClose(tab.id) }}
