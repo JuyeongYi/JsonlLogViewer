@@ -13,6 +13,12 @@ contextBridge.exposeInMainWorld('fileApi', {
     ipcRenderer.on('file:append', handler)
     return () => ipcRenderer.removeListener('file:append', handler)
   },
+  onCliOpen: (callback: (paths: string[], tail: boolean) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, paths: string[], tail: boolean) =>
+      callback(paths, tail)
+    ipcRenderer.on('cli:openFiles', handler)
+    return () => ipcRenderer.removeListener('cli:openFiles', handler)
+  },
 })
 
 contextBridge.exposeInMainWorld('windowApi', {

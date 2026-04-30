@@ -5,7 +5,7 @@ export function useTabManager() {
   const [tabs, setTabs] = useState<Tab[]>([])
   const [activeTabId, setActiveTabId] = useState<string | null>(null)
 
-  const openTab = useCallback((path: string) => {
+  const openTab = useCallback((path: string, options: { tail?: boolean } = {}) => {
     setTabs(prev => {
       const existing = prev.find(t => t.path === path)
       if (existing) {
@@ -16,6 +16,7 @@ export function useTabManager() {
         id: crypto.randomUUID(),
         path,
         label: path.split(/[\\/]/).pop() ?? path,
+        tail: options.tail ?? true,
       }
       setActiveTabId(newTab.id)
       return [...prev, newTab]

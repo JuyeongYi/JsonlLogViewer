@@ -21,6 +21,7 @@ export interface Tab {
   id: string
   path: string
   label: string
+  tail?: boolean  // undefined/true = tail on, false = tail off
 }
 
 // window.fileApi 타입 선언 (preload contextBridge)
@@ -35,6 +36,7 @@ declare global {
       watch: (path: string) => Promise<{ ok: boolean }>
       unwatch: (path: string) => Promise<{ ok: boolean }>
       onAppend: (callback: (path: string, newContent: string) => void) => () => void
+      onCliOpen: (callback: (paths: string[], tail: boolean) => void) => () => void
     }
     schemaApi: {
       list: () => Promise<SchemaEntry[]>

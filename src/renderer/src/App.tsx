@@ -92,6 +92,14 @@ export default function App(): React.ReactElement {
     session.openPaths.forEach(p => openTab(p))
   }, [])
 
+  // CLI에서 두 번째 인스턴스 실행 시 파일 추가 수신
+  useEffect(() => {
+    const unsubscribe = window.fileApi.onCliOpen((paths, tail) => {
+      paths.forEach(p => openTab(p, { tail }))
+    })
+    return unsubscribe
+  }, [openTab])
+
   // 세션 저장 + 타이틀 업데이트 (탭 변경 시)
   useEffect(() => {
     const activeIndex = tabs.findIndex(t => t.id === activeTabId)
@@ -154,7 +162,9 @@ export default function App(): React.ReactElement {
         }))
       })
       // 실시간 tail 시작
-      window.fileApi.watch(tab.path)
+      if (tab.tail !== false) {
+        window.fileApi.watch(tab.path)
+      }
     }
   }, [tabs])
 

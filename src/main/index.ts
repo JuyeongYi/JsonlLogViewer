@@ -4,10 +4,14 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers } from './ipc'
 import { unwatchAll } from './fileWatcher'
+import { parseArgv, runSchemaCommand, printHelp } from './cli'
+
+// ── 단일 인스턴스 lock ──────────────────────────────────
+let mainWindow: BrowserWindow | null = null
 
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -20,7 +24,7 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow!.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -37,11 +41,45 @@ function createWindow(): void {
   }
 }
 
+// ── CLI 진입점 ──────────────────────────────────────────
+const cliArgs = process.argv.slice(app.isPackaged ? 1 : 2)
+const parsed = parseArgv(cliArgs)
+
+if (parsed.cmd === 'help') {
+  printHelp()
+  process.exit(0)
+}
+if (parsed.cmd === 'schema') {
+  process.exit(runSchemaCommand(parsed))
+}
+if (parsed.cmd === 'error') {
+  process.stderr.write(parsed.message + '\n')
+  process.stderr.write('도움말: jllv --help\n')
+  process.exit(1)
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 // OS 다크/라이트 모드 자동 추적
 nativeTheme.themeSource = 'system'
+
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  app.quit()
+}
+
+app.on('second-instance', (_event, secondArgv) => {
+  const secondArgs = secondArgv.slice(app.isPackaged ? 1 : 2)
+  const secondParsed = parseArgv(secondArgs)
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.focus()
+    if (secondParsed.cmd === 'open' && secondParsed.paths.length > 0) {
+      mainWindow.webContents.send('cli:openFiles', secondParsed.paths, secondParsed.tail)
+    }
+  }
+})
 
 app.whenReady().then(() => {
   // Set app user model id for windows
@@ -59,6 +97,13 @@ app.whenReady().then(() => {
 
   registerIpcHandlers()
   createWindow()
+
+  // 첫 인스턴스가 open 명령으로 실행된 경우
+  if (parsed.cmd === 'open' && parsed.paths.length > 0 && mainWindow) {
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow!.webContents.send('cli:openFiles', parsed.paths, parsed.tail)
+    })
+  }
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
