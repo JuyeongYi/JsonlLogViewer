@@ -9,6 +9,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
     globals: true,
+    environmentMatchGlobs: [
+      ['tests/renderer/**', 'jsdom'],
+      ['tests/main/**', 'node'],
+    ],
   },
   resolve: {
     alias: {
