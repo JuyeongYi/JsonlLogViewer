@@ -5,6 +5,14 @@ contextBridge.exposeInMainWorld('fileApi', {
     ipcRenderer.invoke('file:open'),
   readFile: (path: string): Promise<{ content: string; error?: string }> =>
     ipcRenderer.invoke('file:read', path),
+  watch: (path: string) => ipcRenderer.invoke('file:watch', path),
+  unwatch: (path: string) => ipcRenderer.invoke('file:unwatch', path),
+  onAppend: (callback: (path: string, newContent: string) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, path: string, content: string) =>
+      callback(path, content)
+    ipcRenderer.on('file:append', handler)
+    return () => ipcRenderer.removeListener('file:append', handler)
+  },
 })
 
 contextBridge.exposeInMainWorld('schemaApi', {

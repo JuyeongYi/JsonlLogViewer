@@ -3,6 +3,7 @@ import { readFileSync, mkdirSync, writeFileSync, rmSync, existsSync, readdirSync
 import { join } from 'path'
 import AdmZip from 'adm-zip'
 import { loadSchemas, getSchemaDir, saveSchemaOrder } from './schemaRegistry'
+import { watchFile, unwatchFile } from './fileWatcher'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('file:open', async () => {
@@ -23,6 +24,16 @@ export function registerIpcHandlers(): void {
     } catch (err) {
       return { content: '', error: String(err) }
     }
+  })
+
+  ipcMain.handle('file:watch', (_event, filePath: string) => {
+    watchFile(filePath, _event.sender)
+    return { ok: true }
+  })
+
+  ipcMain.handle('file:unwatch', (_event, filePath: string) => {
+    unwatchFile(filePath)
+    return { ok: true }
   })
 
   ipcMain.handle('schema:list', () => loadSchemas())

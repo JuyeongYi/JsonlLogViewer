@@ -17,12 +17,21 @@ export interface FilterState {
   categoryRegex: string  // category 필드 정규식 필터
 }
 
+export interface Tab {
+  id: string
+  path: string
+  label: string
+}
+
 // window.fileApi 타입 선언 (preload contextBridge)
 declare global {
   interface Window {
     fileApi: {
       openFile: () => Promise<string | null>
       readFile: (path: string) => Promise<{ content: string; error?: string }>
+      watch: (path: string) => Promise<{ ok: boolean }>
+      unwatch: (path: string) => Promise<{ ok: boolean }>
+      onAppend: (callback: (path: string, newContent: string) => void) => () => void
     }
     schemaApi: {
       list: () => Promise<SchemaEntry[]>
