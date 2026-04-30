@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react'
 import './styles/app.css'
 import type { LogRow, SchemaEntry } from './types'
 import { applyFilter, type LogFileState } from './hooks/useLogFile'
+import { setRemoteSchemaCallback, extractStem } from './utils/schemaValidator'
 import { parseJsonlContent } from './utils/parser'
 import { useTabManager } from './hooks/useTabManager'
 import { useSchemaRegistry } from './hooks/useSchemaRegistry'
@@ -84,6 +85,28 @@ export default function App(): React.ReactElement {
     if (!path) return
     openTab(path)
   }, [openTab])
+
+  // $schema 원격 fetch 완료 시 해당 URL 사용 행의 _schemaId 초기화
+  useEffect(() => {
+    setRemoteSchemaCallback((schemaId) => {
+      setTabStates(prev => {
+        const next = new Map(prev)
+        for (const [tabId, state] of next) {
+          let changed = false
+          state.rows.forEach(r => {
+            const ds = r['$schema']
+            if (typeof ds === 'string' && extractStem(ds) === schemaId && !r._schemaPinned) {
+              r._schemaId = null
+              changed = true
+            }
+          })
+          if (changed) next.set(tabId, { ...state })
+        }
+        return next
+      })
+    })
+    return () => setRemoteSchemaCallback(null)
+  }, [])
 
   // 세션 복원 (마운트 시 1회)
   useEffect(() => {

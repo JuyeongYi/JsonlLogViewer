@@ -1,5 +1,54 @@
 import type { SchemaEntry } from '../types'
 
+/**
+ * $schema URI에서 stem을 추출해 등록 스키마 ID로 사용한다.
+ * "https://json.schemastore.org/http-request.json" → "http-request"
+ */
+export function extractStem(url: string): string {
+  const seg = url.split('/').pop() ?? url
+  return seg.replace(/\.json$/i, '')
+}
+
+// ── 원격 스키마 캐시 ─────────────────────────────────────
+// null = 가져오기 실패, 값 있음 = 성공
+const remoteSchemaCache = new Map<string, SchemaEntry | null>()
+const pendingFetches = new Set<string>()
+let onRemoteSchemaFetched: ((schemaId: string) => void) | null = null
+
+/** 원격 스키마 로드 완료 시 행 재매칭 트리거 콜백 */
+export function setRemoteSchemaCallback(cb: ((schemaId: string) => void) | null): void {
+  onRemoteSchemaFetched = cb
+}
+
+export function clearRemoteSchemaCache(): void {
+  remoteSchemaCache.clear()
+  pendingFetches.clear()
+}
+
+async function fetchRemoteSchema(url: string): Promise<void> {
+  if (pendingFetches.has(url) || remoteSchemaCache.has(url)) return
+  pendingFetches.add(url)
+  try {
+    const resp = await fetch(url)
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+    const schema = await resp.json()
+    const id = extractStem(url)
+    remoteSchemaCache.set(url, {
+      id,
+      displayName: (typeof schema.title === 'string' ? schema.title : null) ?? id,
+      schema,
+      hasViewer: false,
+      viewerPath: null,
+    })
+    cache.delete(id)
+    onRemoteSchemaFetched?.(id)
+  } catch {
+    remoteSchemaCache.set(url, null)
+  } finally {
+    pendingFetches.delete(url)
+  }
+}
+
 // CSP-safe validator (no eval / new Function)
 // Supports: type, required, properties (recursive), enum, minimum, maximum
 
@@ -116,15 +165,42 @@ export function findMatchingSchema(
   schemas: SchemaEntry[],
   row: Record<string, unknown>
 ): SchemaEntry | null {
-  // row.schema 필드 힌트 우선
+  const tryEntry = (entry: SchemaEntry) => {
+    if (!cache.has(entry.id)) {
+      const s = entry.schema
+      cache.set(entry.id, (data) => validate(s, data))
+    }
+    try { return cache.get(entry.id)!(row) ? entry : null } catch { return null }
+  }
+
+  // $schema: 로컬 등록 스키마(stem) → 없으면 URI fetch
+  if (typeof row['$schema'] === 'string') {
+    const url = row['$schema']
+    const stem = extractStem(url)
+
+    // 1. 로컬 등록 스키마 확인 (schema.json + viewer.html 모두 활용)
+    const local = schemas.find(s => s.id === stem)
+    if (local) {
+      const matched = tryEntry(local)
+      if (matched) return matched
+    }
+
+    // 2. 로컬 없음 → 원격 캐시 확인 또는 fetch 트리거
+    const cached = remoteSchemaCache.get(url)
+    if (cached) {
+      const matched = tryEntry(cached)
+      if (matched) return matched
+    } else if (cached === undefined) {
+      fetchRemoteSchema(url)  // 백그라운드 fetch, 완료 시 행 재매칭
+    }
+  }
+
+  // schema: 등록 스키마 직접 ID 매칭
   if (typeof row['schema'] === 'string') {
-    const hinted = schemas.find(s => s.id === row['schema'])
-    if (hinted) {
-      if (!cache.has(hinted.id)) {
-        const schema = hinted.schema
-        cache.set(hinted.id, (data) => validate(schema, data))
-      }
-      try { if (cache.get(hinted.id)!(row)) return hinted } catch { /* fall through */ }
+    const local = schemas.find(s => s.id === row['schema'])
+    if (local) {
+      const matched = tryEntry(local)
+      if (matched) return matched
     }
   }
 
