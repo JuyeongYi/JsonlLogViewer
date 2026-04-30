@@ -29,6 +29,24 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
     })
   }, [editTarget?.viewerPath])
 
+  const loadFile = (target: 'schema' | 'viewer') => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = target === 'schema' ? '.json' : '.html,.htm'
+    input.onchange = () => {
+      const file = input.files?.[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = e => {
+        const text = e.target?.result as string
+        if (target === 'schema') setSchemaJson(text)
+        else setViewerHtml(text)
+      }
+      reader.readAsText(file, 'utf-8')
+    }
+    input.click()
+  }
+
   const handleSave = async () => {
     try { JSON.parse(schemaJson) } catch {
       setError('JSON Schema가 유효하지 않습니다'); return
@@ -93,7 +111,12 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
         </div>
         <div style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0, marginBottom: 8 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>JSON Schema</div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, gap: 8 }}>
+              <span style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase' }}>JSON Schema</span>
+              <button onClick={() => loadFile('schema')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 3, color: '#94a3b8', cursor: 'pointer', fontSize: 10, padding: '1px 6px' }}>
+                📂 파일에서 로드
+              </button>
+            </div>
             <textarea
               placeholder='{"type":"object","required":["timestamp","level","msg"]}'
               value={schemaJson}
@@ -102,9 +125,20 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
             />
           </div>
           <div style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>viewer.html <span style={{ opacity: 0.5 }}>(선택사항)</span></div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, gap: 8 }}>
+              <span style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase' }}>viewer.html</span>
+              <span style={{ fontSize: 10, opacity: 0.3 }}>(선택사항)</span>
+              <button onClick={() => loadFile('viewer')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 3, color: '#94a3b8', cursor: 'pointer', fontSize: 10, padding: '1px 6px' }}>
+                📂 파일에서 로드
+              </button>
+              {viewerHtml && (
+                <button onClick={() => setViewerHtml('')} style={{ background: 'none', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 3, color: '#f87171', cursor: 'pointer', fontSize: 10, padding: '1px 6px' }}>
+                  × 초기화
+                </button>
+              )}
+            </div>
             <textarea
-              placeholder="<style>...</style>&#10;<div id=&quot;root&quot;></div>&#10;<script>window.addEventListener('message', e => { ... })</script>"
+              placeholder="<style>...</style>&#10;<div id='root'></div>&#10;<script>window.addEventListener('message', e => { ... })</script>"
               value={viewerHtml}
               onChange={e => setViewerHtml(e.target.value)}
               style={{ ...inputStyle, flex: 1, resize: 'none', fontFamily: 'monospace' }}

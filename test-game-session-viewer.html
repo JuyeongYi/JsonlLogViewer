@@ -98,7 +98,7 @@ window.addEventListener('message', e => {
 
   // 객체 필드 (rewards 등)
   for (const [k, v] of objects) {
-    const entries = Object.entries(v as object)
+    const entries = Object.entries(v)
     sections += `<div class="section">
       <div class="section-title">${k}</div>
       <div class="obj-block">${renderKV(entries)}</div>
