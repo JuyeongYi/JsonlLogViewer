@@ -24,3 +24,7 @@ not valid json
 {"timestamp":"2024-01-01T10:00:07.333Z","level":"error","msg":"DELETE /api/session/sess_001 401 Unauthorized","category":"http","method":"DELETE","path":"/api/session/sess_001","status_code":401,"duration_ms":8,"timing":{"dns":1,"connect":2,"ttfb":5,"transfer":0},"request_headers":{"Authorization":"Bearer tok_expired"},"response_headers":{"Content-Type":"application/json","WWW-Authenticate":"Bearer realm=api"},"response_size_bytes":67,"client_ip":"192.168.1.42","error":{"code":"TOKEN_EXPIRED","message":"Access token has expired"}}
 {"timestamp":"2024-01-01T10:00:10.000Z","level":"info","msg":"PATCH /api/profile 204 No Content","category":"http","method":"PATCH","path":"/api/profile","status_code":204,"duration_ms":28,"timing":{"dns":1,"connect":3,"ttfb":22,"transfer":2},"request_headers":{"Authorization":"Bearer tok_xyz","Content-Type":"application/json"},"response_headers":{"X-Request-Id":"req_9f3a2"},"response_size_bytes":0,"client_ip":"10.0.0.15"}
 {"timestamp":"2024-01-01T10:00:15.000Z","level":"info","msg":"일반 로그 - 스키마 없음"}
+{"timestamp":"2026-04-30T15:10:00Z","level":"info","msg":"실시간 tail 테스트 1","category":"test"}
+{"timestamp":"2026-04-30T06:15:42Z","level":"info","msg":"실시간 tail 테스트 — 현재 시각","category":"test","added_at":"15:15:42"}
+{"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}
+{"timestamp":"2026-04-30T15:20:00Z","level":"warn","msg":"tail 테스트","category":"test"}

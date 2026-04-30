@@ -33,6 +33,7 @@ export default function App(): React.ReactElement {
   const [tabStates, setTabStates] = useState<Map<string, LogFileState>>(new Map())
   const [selectedIndexes, setSelectedIndexes] = useState<Map<string, number | null>>(new Map())
 
+  const [newRowTabs, setNewRowTabs] = useState<Set<string>>(new Set())
   const [showSchemaManagement, setShowSchemaManagement] = useState(false)
   const [editTarget, setEditTarget] = useState<SchemaEntry | undefined>(undefined)
   const [rowMenu, setRowMenu] = useState<{ x: number; y: number; row: LogRow } | null>(null)
@@ -110,9 +111,16 @@ export default function App(): React.ReactElement {
           filteredRows: applyFilter(combined, state.filter),
         })
       })
+      // 비활성 탭에만 발광 점 표시
+      setNewRowTabs(prev => {
+        if (tab.id === activeTabId) return prev
+        const next = new Set(prev)
+        next.add(tab.id)
+        return next
+      })
     })
     return unsubscribe
-  }, [tabs])
+  }, [tabs, activeTabId])
 
   // 필터 변경
   const setFilter = useCallback((filter: typeof INITIAL_FILTER) => {
@@ -235,7 +243,12 @@ export default function App(): React.ReactElement {
       <TabBar
         tabs={tabs}
         activeTabId={activeTabId}
-        onSelect={id => { setActiveTabId(id); setRowMenu(null) }}
+        newRowTabs={newRowTabs}
+        onSelect={id => {
+          setActiveTabId(id)
+          setRowMenu(null)
+          setNewRowTabs(prev => { const next = new Set(prev); next.delete(id); return next })
+        }}
         onClose={handleCloseTab}
         onOpen={handleOpenFile}
       />
