@@ -37,6 +37,7 @@ async function fetchRemoteSchema(url: string): Promise<void> {
       id,
       displayName: (typeof schema.title === 'string' ? schema.title : null) ?? id,
       schema,
+      hasSchema: true,
       hasViewer: false,
       viewerPath: null,
     })

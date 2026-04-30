@@ -9,11 +9,33 @@ import { parseArgv, runSchemaCommand, printHelp } from './cli'
 // ── 단일 인스턴스 lock ──────────────────────────────────
 let mainWindow: BrowserWindow | null = null
 
+function loadWindowBounds(): { width: number; height: number; x?: number; y?: number; maximized: boolean } {
+  try {
+    const store = join(app.getPath('userData'), 'window-state.json')
+    if (require('fs').existsSync(store)) {
+      return JSON.parse(require('fs').readFileSync(store, 'utf-8'))
+    }
+  } catch { /* 무시 */ }
+  return { width: 1400, height: 900, maximized: false }
+}
+
+function saveWindowBounds(): void {
+  if (!mainWindow) return
+  try {
+    const maximized = mainWindow.isMaximized()
+    const bounds = maximized ? {} : mainWindow.getBounds()
+    const store = join(app.getPath('userData'), 'window-state.json')
+    require('fs').writeFileSync(store, JSON.stringify({ ...bounds, maximized }), 'utf-8')
+  } catch { /* 무시 */ }
+}
+
 function createWindow(): void {
-  // Create the browser window.
+  const saved = loadWindowBounds()
+
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: saved.width,
+    height: saved.height,
+    ...(saved.x !== undefined ? { x: saved.x, y: saved.y } : {}),
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -25,7 +47,19 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow!.show()
+    if (saved.maximized) mainWindow!.maximize()
   })
+
+  // 크기/위치 변경 시 저장 (300ms 디바운스)
+  let saveTimer: ReturnType<typeof setTimeout> | null = null
+  const scheduleSave = () => {
+    if (saveTimer) clearTimeout(saveTimer)
+    saveTimer = setTimeout(saveWindowBounds, 300)
+  }
+  mainWindow.on('resize', scheduleSave)
+  mainWindow.on('move', scheduleSave)
+  mainWindow.on('maximize', saveWindowBounds)
+  mainWindow.on('unmaximize', saveWindowBounds)
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
