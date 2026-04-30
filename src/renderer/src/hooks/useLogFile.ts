@@ -12,14 +12,32 @@ export interface LogFileState {
 }
 
 function applyFilter(rows: LogRow[], filter: FilterState): LogRow[] {
-  return rows.filter(row => {
-    if (filter.level && row.level?.toLowerCase() !== filter.level.toLowerCase()) {
-      return false
+  // 1. Level filter (multi-select, empty = all)
+  let result = filter.levels.length === 0
+    ? rows
+    : rows.filter(row => filter.levels.includes(String(row.level ?? '').toLowerCase()))
+
+  // 2. Text filter (_raw)
+  if (filter.text) {
+    const text = filter.text.toLowerCase()
+    result = result.filter(row => row._raw.toLowerCase().includes(text))
+  }
+
+  // 3. Msg regex filter
+  if (filter.msgRegex) {
+    try {
+      const re = new RegExp(filter.msgRegex)
+      result = result.filter(row => re.test(String(row.msg ?? '')))
+    } catch {
+      // invalid regex — skip this filter
     }
-    if (filter.text && !row._raw.toLowerCase().includes(filter.text.toLowerCase())) {
-      return false
-    }
-    return true
+  }
+
+  // 4. Sort by timestamp
+  return [...result].sort((a, b) => {
+    const ta = a.timestamp ? new Date(String(a.timestamp)).getTime() : 0
+    const tb = b.timestamp ? new Date(String(b.timestamp)).getTime() : 0
+    return filter.sortOrder === 'asc' ? ta - tb : tb - ta
   })
 }
 
@@ -28,7 +46,7 @@ export function useLogFile() {
     path: null,
     rows: [],
     filteredRows: [],
-    filter: { text: '', level: '' },
+    filter: { text: '', levels: [], sortOrder: 'asc', msgRegex: '' },
     isLoading: false,
     error: null,
   })
