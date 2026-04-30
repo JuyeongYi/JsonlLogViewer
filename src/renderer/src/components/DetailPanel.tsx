@@ -121,13 +121,36 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
         style={{ height: 4, cursor: 'ns-resize', background: 'transparent', flexShrink: 0, borderTop: '2px solid rgba(255,255,255,0.06)' }}
         title="드래그해서 패널 높이 조절"
       />
-      {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '4px 12px', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        <span style={{ fontSize: 11, opacity: 0.5, flex: 1 }}>
-          줄 #{row._lineNumber}
-          {matchedSchema && <span style={{ color: 'var(--accent)', marginLeft: 8 }}>● {matchedSchema.displayName}</span>}
-          {row._parseError && <span style={{ color: '#f87171', marginLeft: 8 }}>⚠ {row._parseError}</span>}
+      {/* 헤더: 타임스탬프 레벨 카테고리 메시지 */}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '4px 12px', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0, gap: 8, minWidth: 0 }}>
+        {/* 타임스탬프 */}
+        {row.timestamp && (
+          <span style={{ fontSize: 11, opacity: 0.5, flexShrink: 0, fontFamily: 'monospace' }}>
+            {(() => { const ts = String(row.timestamp); return ts.length > 19 ? ts.slice(11, 19) : ts })()}
+          </span>
+        )}
+        {/* 레벨 */}
+        {row.level && (
+          <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', flexShrink: 0,
+            color: ({ error: '#f87171', warn: '#fbbf24', warning: '#fbbf24', info: '#4ade80', debug: '#94a3b8' } as Record<string,string>)[String(row.level).toLowerCase()] ?? 'var(--text-2)'
+          }}>
+            {String(row.level)}
+          </span>
+        )}
+        {/* 카테고리 */}
+        {row.category != null && (
+          <span style={{ fontSize: 11, opacity: 0.5, flexShrink: 0 }}>{String(row.category)}</span>
+        )}
+        {/* 메시지 */}
+        <span style={{ fontSize: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {String(row.msg ?? row._raw)}
         </span>
+        {/* 스키마 / 에러 뱃지 */}
+        {matchedSchema && <span style={{ fontSize: 10, color: 'var(--accent)', flexShrink: 0 }}>● {matchedSchema.displayName}</span>}
+        {row._parseError && <span style={{ fontSize: 10, color: '#f87171', flexShrink: 0 }}>⚠ {row._parseError}</span>}
+        {/* 줄 번호 */}
+        <span style={{ fontSize: 10, opacity: 0.35, flexShrink: 0, fontFamily: 'monospace' }}>#{row._lineNumber}</span>
+      </div>
         {matchedSchema?.hasViewer && (
           <button
             onClick={() => setUseFallback(f => !f)}
