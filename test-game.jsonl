@@ -1,0 +1,6 @@
+{"timestamp":"2024-01-01T10:00:00Z","level":"info","msg":"플레이어 로그인","category":"auth","event_type":"player_login","player_id":"p001","server":"game-01"}
+{"timestamp":"2024-01-01T10:00:05Z","level":"info","msg":"매칭 시작","category":"matchmaking","event_type":"match_start","match_id":"m123","players":["p001","p002"]}
+{"timestamp":"2024-01-01T10:00:10Z","level":"warn","msg":"패킷 지연","category":"network","event_type":"packet_delay","player_id":"p002","latency_ms":250}
+{"timestamp":"2024-01-01T10:00:15Z","level":"error","msg":"충돌 감지 오류","category":"physics","event_type":"collision_error","object_id":"obj_42"}
+{"timestamp":"2024-01-01T10:00:20Z","level":"info","msg":"게임 종료","category":"match","event_type":"match_end","match_id":"m123","winner":"p001"}
+{"timestamp":"2024-01-01T10:00:21Z","level":"info","msg":"일반 로그 (스키마 없음)","category":"system"}
