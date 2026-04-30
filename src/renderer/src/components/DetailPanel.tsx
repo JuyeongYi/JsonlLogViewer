@@ -14,19 +14,40 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
   const [useFallback, setUseFallback] = useState(false)
   const handleFallback = useCallback(() => setUseFallback(true), [])
 
-  // 드래그 리사이즈
+  // 세로 드래그 (패널 높이)
   const [panelHeight, setPanelHeight] = useState(280)
-  const dragRef = useRef<{ startY: number; startH: number } | null>(null)
+  const vDragRef = useRef<{ startY: number; startH: number } | null>(null)
 
-  const onDragStart = (e: React.MouseEvent) => {
-    dragRef.current = { startY: e.clientY, startH: panelHeight }
+  const onVDragStart = (e: React.MouseEvent) => {
+    vDragRef.current = { startY: e.clientY, startH: panelHeight }
     const onMove = (ev: MouseEvent) => {
-      if (!dragRef.current) return
-      const delta = dragRef.current.startY - ev.clientY
-      setPanelHeight(Math.max(120, Math.min(window.innerHeight * 0.75, dragRef.current.startH + delta)))
+      if (!vDragRef.current) return
+      const delta = vDragRef.current.startY - ev.clientY
+      setPanelHeight(Math.max(120, Math.min(window.innerHeight * 0.75, vDragRef.current.startH + delta)))
     }
     const onUp = () => {
-      dragRef.current = null
+      vDragRef.current = null
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
+
+  // 가로 드래그 (뷰어|JSON 트리 너비)
+  const [jsonTreeWidth, setJsonTreeWidth] = useState(280)
+  const hDragRef = useRef<{ startX: number; startW: number } | null>(null)
+
+  const onHDragStart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    hDragRef.current = { startX: e.clientX, startW: jsonTreeWidth }
+    const onMove = (ev: MouseEvent) => {
+      if (!hDragRef.current) return
+      const delta = hDragRef.current.startX - ev.clientX
+      setJsonTreeWidth(Math.max(100, Math.min(600, hDragRef.current.startW + delta)))
+    }
+    const onUp = () => {
+      hDragRef.current = null
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
@@ -71,9 +92,9 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
 
   return (
     <div style={{ height: panelHeight, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
-      {/* 드래그 핸들 */}
+      {/* 드래그 핸들 (세로) */}
       <div
-        onMouseDown={onDragStart}
+        onMouseDown={onVDragStart}
         style={{ height: 4, cursor: 'ns-resize', background: 'transparent', flexShrink: 0, borderTop: '2px solid rgba(255,255,255,0.06)' }}
         title="드래그해서 패널 높이 조절"
       />
@@ -102,12 +123,17 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
             {row._raw}
           </pre>
         ) : showViewer ? (
-          // 스키마 매칭: 좌측 iframe 뷰어 + 우측 JSON 트리
+          // 스키마 매칭: 좌측 iframe 뷰어 + 드래그 구분선 + 우측 JSON 트리
           <>
-            <div style={{ flex: 1, overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
               <SchemaViewer row={row} schema={matchedSchema!} onFallback={handleFallback} />
             </div>
-            <div style={{ width: 280, overflow: 'auto', padding: 10, fontSize: 12, fontFamily: 'monospace', flexShrink: 0 }}>
+            {/* 가로 드래그 핸들 */}
+            <div
+              onMouseDown={onHDragStart}
+              style={{ width: 4, cursor: 'ew-resize', flexShrink: 0, background: 'rgba(255,255,255,0.06)', borderLeft: '1px solid rgba(255,255,255,0.06)' }}
+            />
+            <div style={{ width: jsonTreeWidth, overflow: 'auto', padding: 10, fontSize: 12, fontFamily: 'monospace', flexShrink: 0 }}>
               <JsonTree data={displayData} />
             </div>
           </>
