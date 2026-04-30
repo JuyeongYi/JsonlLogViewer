@@ -1,8 +1,23 @@
-node_modules
-dist
-out
-.DS_Store
-.eslintcache
-*.log*
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+
+# Electron
 .superpowers/
-.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Test coverage
+coverage/

@@ -41,4 +41,23 @@ describe('findMatchingSchema', () => {
   it('빈 스키마 목록이면 null', () => {
     expect(findMatchingSchema([], { level: 'info' })).toBeNull()
   })
+
+  it('row.schema 필드가 있으면 해당 스키마 우선 매칭', () => {
+    const schemas = [
+      makeSchema('generic', ['level']),
+      makeSchema('specific', ['level', 'event_type']),
+    ]
+    // generic이 앞에 있어도, schema 힌트로 specific 우선
+    const row = { level: 'info', event_type: 'login', schema: 'specific' }
+    expect(findMatchingSchema(schemas, row)?.id).toBe('specific')
+  })
+
+  it('row.schema 힌트 스키마가 JSON Schema 검증 실패 시 일반 순서로 폴백', () => {
+    const schemas = [
+      makeSchema('fallback', ['level']),
+      makeSchema('strict',   ['level', 'required_missing']),
+    ]
+    const row = { level: 'info', schema: 'strict' }  // strict 검증 실패
+    expect(findMatchingSchema(schemas, row)?.id).toBe('fallback')
+  })
 })

@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 430" width="820" height="430">
+  <defs>
+    <style>
+      .kb-bg   { fill:#111113; }
+      .key-def { fill:#2c2c2e; }
+      .key-esc { fill:#475569; }
+      .key-lv  { fill:#991b1b; }
+      .key-nav { fill:#166534; }
+      .key-inp { fill:#92400e; }
+      .key-tab { fill:#1e40af; }
+      .key-ctrl{ fill:#4c1d95; }
+      .lbl     { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:13px; fill:#e5e5ea; text-anchor:middle; dominant-baseline:middle; font-weight:600; }
+      .lbl-def { fill:#8a8a8e; }
+      .lbl-sm  { font-size:9px; fill:rgba(255,255,255,0.55); text-anchor:middle; }
+      .lbl-hint{ font-size:8px; fill:rgba(255,255,255,0.45); text-anchor:middle; }
+      .legend-dot { }
+      .leg-lbl { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:12px; fill:#aeaeb2; dominant-baseline:middle; }
+    </style>
+  </defs>
+
+  <!-- Keyboard shell -->
+  <rect width="820" height="295" rx="14" fill="#1a1a1c"/>
+  <rect x="6" y="6" width="808" height="283" rx="10" class="kb-bg"/>
+
+  <!-- ═══ ROW 1: Esc + Numbers ═══ -->
+  <!-- Esc -->
+  <rect x="14" y="14" width="52" height="40" rx="6" class="key-esc"/>
+  <text x="40" y="35" class="lbl">Esc</text>
+
+  <!-- 1~0 (default) -->
+  <!-- x starts at 72, step 44 -->
+  <rect x="72"  y="14" width="40" height="40" rx="6" class="key-def"/><text x="92"  y="35" class="lbl lbl-def">1</text>
+  <rect x="116" y="14" width="40" height="40" rx="6" class="key-def"/><text x="136" y="35" class="lbl lbl-def">2</text>
+  <rect x="160" y="14" width="40" height="40" rx="6" class="key-def"/><text x="180" y="35" class="lbl lbl-def">3</text>
+  <rect x="204" y="14" width="40" height="40" rx="6" class="key-def"/><text x="224" y="35" class="lbl lbl-def">4</text>
+  <rect x="248" y="14" width="40" height="40" rx="6" class="key-def"/><text x="268" y="35" class="lbl lbl-def">5</text>
+  <rect x="292" y="14" width="40" height="40" rx="6" class="key-def"/><text x="312" y="35" class="lbl lbl-def">6</text>
+  <rect x="336" y="14" width="40" height="40" rx="6" class="key-def"/><text x="356" y="35" class="lbl lbl-def">7</text>
+  <rect x="380" y="14" width="40" height="40" rx="6" class="key-def"/><text x="400" y="35" class="lbl lbl-def">8</text>
+  <rect x="424" y="14" width="40" height="40" rx="6" class="key-def"/><text x="444" y="35" class="lbl lbl-def">9</text>
+  <rect x="468" y="14" width="40" height="40" rx="6" class="key-def"/><text x="488" y="35" class="lbl lbl-def">0</text>
+  <rect x="512" y="14" width="40" height="40" rx="6" class="key-def"/><text x="532" y="35" class="lbl lbl-def">-</text>
+  <rect x="556" y="14" width="40" height="40" rx="6" class="key-def"/><text x="576" y="35" class="lbl lbl-def">=</text>
+  <!-- Backspace -->
+  <rect x="600" y="14" width="80" height="40" rx="6" class="key-def"/><text x="640" y="35" class="lbl lbl-def">⌫</text>
+
+  <!-- ═══ ROW 2: Tab + QWERTY ═══ -->
+  <!-- Tab -->
+  <rect x="14"  y="62" width="52" height="40" rx="6" class="key-def"/><text x="40"  y="83" class="lbl lbl-def">Tab</text>
+
+  <!-- Q – level:error -->
+  <rect x="72"  y="62" width="40" height="40" rx="6" class="key-lv"/>
+  <text x="92"  y="78" class="lbl">Q</text>
+  <text x="92"  y="94" class="lbl-sm">error</text>
+
+  <!-- W – level:warn -->
+  <rect x="116" y="62" width="40" height="40" rx="6" class="key-lv"/>
+  <text x="136" y="78" class="lbl">W</text>
+  <text x="136" y="94" class="lbl-sm">warn</text>
+
+  <!-- E – level:info -->
+  <rect x="160" y="62" width="40" height="40" rx="6" class="key-lv"/>
+  <text x="180" y="78" class="lbl">E</text>
+  <text x="180" y="94" class="lbl-sm">info</text>
+
+  <!-- R – level:debug -->
+  <rect x="204" y="62" width="40" height="40" rx="6" class="key-lv"/>
+  <text x="224" y="78" class="lbl">R</text>
+  <text x="224" y="94" class="lbl-sm">debug</text>
+
+  <!-- T – sort toggle -->
+  <rect x="248" y="62" width="40" height="40" rx="6" class="key-inp"/>
+  <text x="268" y="78" class="lbl">T</text>
+  <text x="268" y="94" class="lbl-sm">정렬</text>
+
+  <!-- Y (default) -->
+  <rect x="292" y="62" width="40" height="40" rx="6" class="key-def"/><text x="312" y="83" class="lbl lbl-def">Y</text>
+
+  <!-- U – category focus / Ctrl+U clear -->
+  <rect x="336" y="62" width="40" height="40" rx="6" class="key-inp"/>
+  <text x="356" y="75" class="lbl">U</text>
+  <text x="356" y="88" class="lbl-sm">카테고리</text>
+  <text x="356" y="98" class="lbl-hint">^U=초기화</text>
+
+  <!-- I – msg focus / Ctrl+I clear -->
+  <rect x="380" y="62" width="40" height="40" rx="6" class="key-inp"/>
+  <text x="400" y="75" class="lbl">I</text>
+  <text x="400" y="88" class="lbl-sm">msg</text>
+  <text x="400" y="98" class="lbl-hint">^I=초기화</text>
+
+  <!-- O – Ctrl+O open file -->
+  <rect x="424" y="62" width="40" height="40" rx="6" class="key-ctrl"/>
+  <text x="444" y="75" class="lbl">O</text>
+  <text x="444" y="88" class="lbl-sm">^O</text>
+  <text x="444" y="98" class="lbl-hint">열기</text>
+
+  <!-- P (default) -->
+  <rect x="468" y="62" width="40" height="40" rx="6" class="key-def"/><text x="488" y="83" class="lbl lbl-def">P</text>
+
+  <!-- [ – prev tab / { prev view -->
+  <rect x="512" y="62" width="40" height="40" rx="6" class="key-tab"/>
+  <text x="532" y="72" class="lbl">[</text>
+  <text x="532" y="83" class="lbl-sm">이전탭</text>
+  <text x="532" y="94" class="lbl-hint">{ 이전뷰</text>
+
+  <!-- ] – next tab / } next view -->
+  <rect x="556" y="62" width="40" height="40" rx="6" class="key-tab"/>
+  <text x="576" y="72" class="lbl">]</text>
+  <text x="576" y="83" class="lbl-sm">다음탭</text>
+  <text x="576" y="94" class="lbl-hint">} 다음뷰</text>
+
+  <!-- Backslash (default) -->
+  <rect x="600" y="62" width="80" height="40" rx="6" class="key-def"/><text x="640" y="83" class="lbl lbl-def">\</text>
+
+  <!-- ═══ ROW 3: Caps + ASDF ═══ -->
+  <rect x="14"  y="110" width="64" height="40" rx="6" class="key-def"/><text x="46" y="131" class="lbl lbl-def">Caps</text>
+
+  <!-- A-F (default) -->
+  <rect x="82"  y="110" width="40" height="40" rx="6" class="key-def"/><text x="102" y="131" class="lbl lbl-def">A</text>
+  <rect x="126" y="110" width="40" height="40" rx="6" class="key-def"/><text x="146" y="131" class="lbl lbl-def">S</text>
+  <rect x="170" y="110" width="40" height="40" rx="6" class="key-def"/><text x="190" y="131" class="lbl lbl-def">D</text>
+  <rect x="214" y="110" width="40" height="40" rx="6" class="key-def"/><text x="234" y="131" class="lbl lbl-def">F</text>
+  <rect x="258" y="110" width="40" height="40" rx="6" class="key-def"/><text x="278" y="131" class="lbl lbl-def">G</text>
+  <rect x="302" y="110" width="40" height="40" rx="6" class="key-def"/><text x="322" y="131" class="lbl lbl-def">H</text>
+
+  <!-- J – row down -->
+  <rect x="346" y="110" width="40" height="40" rx="6" class="key-nav"/>
+  <text x="366" y="125" class="lbl">J</text>
+  <text x="366" y="140" class="lbl-sm">↓ 행</text>
+
+  <!-- K – row up -->
+  <rect x="390" y="110" width="40" height="40" rx="6" class="key-nav"/>
+  <text x="410" y="125" class="lbl">K</text>
+  <text x="410" y="140" class="lbl-sm">↑ 행</text>
+
+  <!-- L-; (default) -->
+  <rect x="434" y="110" width="40" height="40" rx="6" class="key-def"/><text x="454" y="131" class="lbl lbl-def">L</text>
+  <rect x="478" y="110" width="40" height="40" rx="6" class="key-def"/><text x="498" y="131" class="lbl lbl-def">;</text>
+  <rect x="522" y="110" width="40" height="40" rx="6" class="key-def"/><text x="542" y="131" class="lbl lbl-def">'</text>
+
+  <!-- Enter -->
+  <rect x="566" y="110" width="114" height="40" rx="6" class="key-def"/><text x="623" y="131" class="lbl lbl-def">Enter</text>
+
+  <!-- ═══ ROW 4: Shift + ZXCV ═══ -->
+  <rect x="14"  y="158" width="82" height="40" rx="6" class="key-def"/><text x="55" y="179" class="lbl lbl-def">Shift</text>
+  <rect x="100" y="158" width="40" height="40" rx="6" class="key-def"/><text x="120" y="179" class="lbl lbl-def">Z</text>
+  <rect x="144" y="158" width="40" height="40" rx="6" class="key-def"/><text x="164" y="179" class="lbl lbl-def">X</text>
+  <rect x="188" y="158" width="40" height="40" rx="6" class="key-def"/><text x="208" y="179" class="lbl lbl-def">C</text>
+  <rect x="232" y="158" width="40" height="40" rx="6" class="key-def"/><text x="252" y="179" class="lbl lbl-def">V</text>
+  <rect x="276" y="158" width="40" height="40" rx="6" class="key-def"/><text x="296" y="179" class="lbl lbl-def">B</text>
+  <rect x="320" y="158" width="40" height="40" rx="6" class="key-def"/><text x="340" y="179" class="lbl lbl-def">N</text>
+  <rect x="364" y="158" width="40" height="40" rx="6" class="key-def"/><text x="384" y="179" class="lbl lbl-def">M</text>
+  <rect x="408" y="158" width="40" height="40" rx="6" class="key-def"/><text x="428" y="179" class="lbl lbl-def">,</text>
+  <rect x="452" y="158" width="40" height="40" rx="6" class="key-def"/><text x="472" y="179" class="lbl lbl-def">.</text>
+  <rect x="496" y="158" width="40" height="40" rx="6" class="key-def"/><text x="516" y="179" class="lbl lbl-def">/</text>
+  <rect x="540" y="158" width="140" height="40" rx="6" class="key-def"/><text x="610" y="179" class="lbl lbl-def">Shift</text>
+
+  <!-- ═══ ROW 5: Ctrl + Space ═══ -->
+  <!-- Ctrl -->
+  <rect x="14"  y="206" width="62" height="40" rx="6" class="key-ctrl"/>
+  <text x="45"  y="221" class="lbl">Ctrl</text>
+  <text x="45"  y="236" class="lbl-sm">+O 열기</text>
+
+  <rect x="80"  y="206" width="52" height="40" rx="6" class="key-def"/><text x="106" y="227" class="lbl lbl-def">Alt</text>
+  <!-- Space -->
+  <rect x="136" y="206" width="364" height="40" rx="6" class="key-def"/>
+  <rect x="504" y="206" width="52" height="40" rx="6" class="key-def"/><text x="530" y="227" class="lbl lbl-def">Alt</text>
+  <rect x="560" y="206" width="62" height="40" rx="6" class="key-ctrl"/>
+  <text x="591" y="221" class="lbl">Ctrl</text>
+  <text x="591" y="236" class="lbl-sm">+O 열기</text>
+
+  <!-- ═══ LEGEND ═══ -->
+  <rect y="260" width="820" height="1" fill="#2c2c2e"/>
+
+  <!-- Legend row 1 -->
+  <rect x="20"  y="275" width="14" height="14" rx="3" fill="#991b1b"/>
+  <text x="40"  y="283" class="leg-lbl">q/w/e/r — 레벨 필터 (error/warn/info/debug)</text>
+
+  <rect x="280" y="275" width="14" height="14" rx="3" fill="#166534"/>
+  <text x="300" y="283" class="leg-lbl">j/k — 행 이동 (↓/↑)</text>
+
+  <rect x="480" y="275" width="14" height="14" rx="3" fill="#1e40af"/>
+  <text x="500" y="283" class="leg-lbl">[ / ] — 이전/다음 탭</text>
+
+  <!-- Legend row 2 -->
+  <rect x="20"  y="300" width="14" height="14" rx="3" fill="#92400e"/>
+  <text x="40"  y="308" class="leg-lbl">t — 정렬  ·  i — msg  ·  u — 카테고리  ·  Ctrl+i/u — 초기화</text>
+
+  <rect x="480" y="300" width="14" height="14" rx="3" fill="#1e40af"/>
+  <text x="500" y="308" class="leg-lbl">{ / } — 이전/다음 뷰</text>
+
+  <!-- Legend row 3 -->
+  <rect x="20"  y="325" width="14" height="14" rx="3" fill="#4c1d95"/>
+  <text x="40"  y="333" class="leg-lbl">Ctrl+O — 파일 열기</text>
+
+  <rect x="480" y="325" width="14" height="14" rx="3" fill="#475569"/>
+  <text x="500" y="333" class="leg-lbl">Esc — 디테일 패널 닫기</text>
+
+  <!-- Title -->
+  <text x="410" y="413" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" fill="#636366" text-anchor="middle">JsonlLogViewer Keyboard Shortcuts</text>
+</svg>

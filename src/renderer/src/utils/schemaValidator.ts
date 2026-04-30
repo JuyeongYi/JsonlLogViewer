@@ -24,6 +24,18 @@ export function findMatchingSchema(
   schemas: SchemaEntry[],
   row: Record<string, unknown>
 ): SchemaEntry | null {
+  // 로그 줄에 schema 필드가 있으면 해당 ID 스키마 우선 시도
+  if (typeof row['schema'] === 'string') {
+    const hinted = schemas.find(s => s.id === row['schema'])
+    if (hinted) {
+      if (!cache.has(hinted.id)) {
+        const schema = hinted.schema
+        cache.set(hinted.id, (data) => validate(schema, data))
+      }
+      try { if (cache.get(hinted.id)!(row)) return hinted } catch { /* fall through */ }
+    }
+  }
+
   for (const entry of schemas) {
     if (!cache.has(entry.id)) {
       const schema = entry.schema
