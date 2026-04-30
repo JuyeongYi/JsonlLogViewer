@@ -54,7 +54,7 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
   const handleDragEnd = () => { setDragIndex(null); setDragOverIndex(null) }
 
   return (
-    <div style={{ width: 180, borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', flexShrink: 0, background: 'rgba(255,255,255,0.02)', position: 'relative' }}>
+    <div style={{ width: 180, borderRight: '2px solid var(--border-2)', display: 'flex', flexDirection: 'column', flexShrink: 0, background: 'var(--bg-raised)', position: 'relative' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '6px 8px 6px 12px', gap: 6 }}>
         <span style={{ fontSize: 11, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em', flex: 1 }}>스키마</span>
