@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import type { LogRow, SchemaEntry } from '../types'
 import { JsonTree } from './JsonTree'
 import { SchemaViewer } from './SchemaViewer'
@@ -12,6 +12,7 @@ interface DetailPanelProps {
 
 export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.ReactElement {
   const [useFallback, setUseFallback] = useState(false)
+  const handleFallback = useCallback(() => setUseFallback(true), [])
 
   useEffect(() => { setUseFallback(false) }, [row])
 
@@ -79,7 +80,7 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
           // 스키마 매칭: 좌측 iframe 뷰어 + 우측 JSON 트리
           <>
             <div style={{ flex: 1, overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
-              <SchemaViewer row={row} schema={matchedSchema!} onFallback={() => setUseFallback(true)} />
+              <SchemaViewer row={row} schema={matchedSchema!} onFallback={handleFallback} />
             </div>
             <div style={{ width: 280, overflow: 'auto', padding: 10, fontSize: 12, fontFamily: 'monospace', flexShrink: 0 }}>
               <JsonTree data={displayData} />

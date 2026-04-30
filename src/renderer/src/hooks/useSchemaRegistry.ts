@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { SchemaEntry } from '../types'
 import { clearValidatorCache } from '../utils/schemaValidator'
+import { clearViewerCache } from '../utils/viewerCache'
 
 export function useSchemaRegistry() {
   const [schemas, setSchemas] = useState<SchemaEntry[]>([])
@@ -8,6 +9,7 @@ export function useSchemaRegistry() {
   const reload = useCallback(async () => {
     const list = await window.schemaApi.list()
     clearValidatorCache()
+    clearViewerCache()
     setSchemas(list)
   }, [])
 

@@ -1,5 +1,5 @@
 import { ipcMain, dialog } from 'electron'
-import { readFileSync, mkdirSync, writeFileSync, rmSync } from 'fs'
+import { readFileSync, mkdirSync, writeFileSync, rmSync, promises as fsPromises } from 'fs'
 import { join } from 'path'
 import { loadSchemas, getSchemaDir } from './schemaRegistry'
 
@@ -15,9 +15,9 @@ export function registerIpcHandlers(): void {
     return result.canceled ? null : result.filePaths[0]
   })
 
-  ipcMain.handle('file:read', (_event, filePath: string) => {
+  ipcMain.handle('file:read', async (_event, filePath: string) => {
     try {
-      const content = readFileSync(filePath, 'utf-8')
+      const content = await fsPromises.readFile(filePath, 'utf-8')
       return { content }
     } catch (err) {
       return { content: '', error: String(err) }
