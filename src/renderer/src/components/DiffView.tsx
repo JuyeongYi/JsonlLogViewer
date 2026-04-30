@@ -22,10 +22,10 @@ export function DiffView({ leftRows, leftLabel, rightRows, rightLabel }: DiffVie
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0, fontSize: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 12px', borderBottom: '1px solid var(--border)', flexShrink: 0, fontSize: 12 }}>
         <span style={{ opacity: 0.6 }}>비교 최대</span>
         <select value={maxLines} onChange={e => setMaxLines(Number(e.target.value))}
-          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4, color: '#e2e8f0', fontSize: 12, padding: '2px 6px' }}>
+          style={{ background: 'var(--border)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text)', fontSize: 12, padding: '2px 6px' }}>
           {[100, 200, 500, 1000].map(n => <option key={n} value={n}>{n}줄</option>)}
         </select>
         <span style={{ opacity: 0.4 }}>좌: {leftLabel} ({leftRows.length}줄) · 우: {rightLabel} ({rightRows.length}줄)</span>

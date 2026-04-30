@@ -17,7 +17,7 @@ const VIEWS: Array<{ id: ViewMode; label: string }> = [
 
 export function ViewSwitcher({ current, onChange, hasTwoTabs }: ViewSwitcherProps): React.ReactElement {
   return (
-    <div style={{ display: 'flex', gap: 2, padding: '4px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+    <div style={{ display: 'flex', gap: 2, padding: '4px 12px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
       {VIEWS.map(v => (
         <button key={v.id} onClick={() => onChange(v.id)}
           disabled={v.id === 'diff' && !hasTwoTabs}

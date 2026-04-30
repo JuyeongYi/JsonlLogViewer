@@ -67,8 +67,8 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
   }
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: 4, color: '#e2e8f0', fontSize: 12, padding: '4px 8px', fontFamily: 'monospace',
+    width: '100%', background: 'var(--border)', border: '1px solid var(--border)',
+    borderRadius: 4, color: 'var(--text)', fontSize: 12, padding: '4px 8px', fontFamily: 'monospace',
   }
 
   return (
@@ -79,10 +79,10 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {!isEditing && (
               <>
-                <button onClick={onImport} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '3px 10px' }}>
+                <button onClick={onImport} style={{ background: 'var(--border)', border: '1px solid var(--border-2)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '3px 10px' }}>
                   📥 가져오기
                 </button>
-                <button onClick={onExport} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '3px 10px' }}>
+                <button onClick={onExport} style={{ background: 'var(--border)', border: '1px solid var(--border-2)', borderRadius: 4, color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '3px 10px' }}>
                   📤 내보내기
                 </button>
               </>
@@ -102,7 +102,7 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
                   placeholder="검색..."
                   value={listSearch}
                   onChange={e => setListSearch(e.target.value)}
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4, color: '#e2e8f0', fontSize: 11, padding: '2px 8px', width: 120, outline: 'none' }}
+                  style={{ background: 'var(--border)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text)', fontSize: 11, padding: '2px 8px', width: 120, outline: 'none' }}
                 />
               )}
             </div>
@@ -142,7 +142,7 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, gap: 8 }}>
               <span style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase' }}>JSON Schema</span>
-              <button onClick={() => loadFile('schema')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 3, color: '#94a3b8', cursor: 'pointer', fontSize: 10, padding: '1px 6px' }}>
+              <button onClick={() => loadFile('schema')} style={{ background: 'none', border: '1px solid var(--border-2)', borderRadius: 3, color: '#94a3b8', cursor: 'pointer', fontSize: 10, padding: '1px 6px' }}>
                 📂 파일에서 로드
               </button>
             </div>
@@ -157,7 +157,7 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, gap: 8 }}>
               <span style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase' }}>viewer.html</span>
               <span style={{ fontSize: 10, opacity: 0.3 }}>(선택사항)</span>
-              <button onClick={() => loadFile('viewer')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 3, color: '#94a3b8', cursor: 'pointer', fontSize: 10, padding: '1px 6px' }}>
+              <button onClick={() => loadFile('viewer')} style={{ background: 'none', border: '1px solid var(--border-2)', borderRadius: 3, color: '#94a3b8', cursor: 'pointer', fontSize: 10, padding: '1px 6px' }}>
                 📂 파일에서 로드
               </button>
               {viewerHtml && (

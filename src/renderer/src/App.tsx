@@ -412,7 +412,7 @@ export default function App(): React.ReactElement {
       {rowMenu && (
         <div
           ref={rowMenuRef}
-          style={{ position: 'fixed', top: rowMenu.y, left: rowMenu.x, background: '#1e1e2e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, padding: '4px 0', zIndex: 1000, minWidth: 180, boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}
+          style={{ position: 'fixed', top: rowMenu.y, left: rowMenu.x, background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, padding: '4px 0', zIndex: 1000, minWidth: 180, boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}
         >
           <div style={{ padding: '4px 12px 6px', fontSize: 10, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             스키마 지정

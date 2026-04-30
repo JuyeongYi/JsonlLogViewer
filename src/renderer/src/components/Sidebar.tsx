@@ -74,7 +74,7 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
             placeholder="검색..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, color: '#e2e8f0', fontSize: 11, padding: '3px 6px', outline: 'none' }}
+            style={{ width: '100%', background: 'var(--border)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text)', fontSize: 11, padding: '3px 6px', outline: 'none' }}
           />
         </div>
       )}
@@ -126,14 +126,14 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
       {contextMenu && (
         <div
           ref={menuRef}
-          style={{ position: 'fixed', top: contextMenu.y, left: contextMenu.x, background: '#1e1e2e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, padding: '4px 0', zIndex: 1000, minWidth: 140, boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}
+          style={{ position: 'fixed', top: contextMenu.y, left: contextMenu.x, background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, padding: '4px 0', zIndex: 1000, minWidth: 140, boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}
         >
           <div style={{ padding: '4px 12px', fontSize: 11, opacity: 0.4, borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 2 }}>
             {contextMenu.schema.displayName}
           </div>
           <button
             onClick={() => { onEditSchema(contextMenu.schema); setContextMenu(null) }}
-            style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer', padding: '6px 14px', fontSize: 13 }}
+            style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer', padding: '6px 14px', fontSize: 13 }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-dim)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}
           >

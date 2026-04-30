@@ -85,7 +85,7 @@ export function FilterBar({ filter, totalCount, filteredCount, onChange, msgInpu
         <span style={{ fontSize: 11, opacity: 0.4 }}>시간:</span>
         <button
           onClick={toggleSort}
-          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, color: '#e2e8f0', cursor: 'pointer', fontSize: 12, padding: '2px 8px' }}
+          style={{ background: 'var(--border)', border: '1px solid var(--border-2)', borderRadius: 4, color: 'var(--text)', cursor: 'pointer', fontSize: 12, padding: '2px 8px' }}
         >
           {filter.sortOrder === 'asc' ? '↑ 오름차순' : '↓ 내림차순'}
         </button>

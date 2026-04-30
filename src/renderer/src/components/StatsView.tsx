@@ -29,7 +29,7 @@ export function StatsView({ rows }: StatsViewProps): React.ReactElement {
       <div>
         <div style={{ fontSize: 12, opacity: 0.5, marginBottom: 8, textTransform: 'uppercase' }}>필드 분포</div>
         <select value={distributionField} onChange={e => setDistributionField(e.target.value)}
-          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, color: '#e2e8f0', fontSize: 12, padding: '3px 8px', marginBottom: 12 }}>
+          style={{ background: 'var(--border)', border: '1px solid var(--border-2)', borderRadius: 4, color: 'var(--text)', fontSize: 12, padding: '3px 8px', marginBottom: 12 }}>
           <option value="">필드 선택...</option>
           {allFields.map(f => <option key={f} value={f}>{f}</option>)}
         </select>
@@ -58,7 +58,7 @@ function LevelBar({ level, count, total, color }: { level: string; count: number
         <span style={{ color }}>{level}</span>
         <span style={{ opacity: 0.6 }}>{count.toLocaleString()} ({pct.toFixed(1)}%)</span>
       </div>
-      <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 2, height: 6 }}>
+      <div style={{ background: 'var(--border)', borderRadius: 2, height: 6 }}>
         <div style={{ background: color, borderRadius: 2, height: 6, width: `${pct}%`, transition: 'width 0.3s' }} />
       </div>
     </div>
