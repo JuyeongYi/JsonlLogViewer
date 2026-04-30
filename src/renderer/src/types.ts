@@ -22,6 +22,12 @@ declare global {
       openFile: () => Promise<string | null>
       readFile: (path: string) => Promise<{ content: string; error?: string }>
     }
+    schemaApi: {
+      list: () => Promise<SchemaEntry[]>
+      save: (id: string, schemaJson: string, configJson: string, viewerHtml: string | null) => Promise<{ ok: boolean }>
+      delete: (id: string) => Promise<{ ok: boolean }>
+      readViewer: (viewerPath: string) => Promise<{ html: string | null; error?: string }>
+    }
   }
 }
 
