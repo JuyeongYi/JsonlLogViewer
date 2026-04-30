@@ -48,22 +48,17 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
     Object.entries(row).filter(([k]) => !k.startsWith('_'))
   )
 
-  // 스키마 매칭 (캐시 우선)
+  // 스키마 탐색 — useFallback과 무관하게 항상 수행 (캐시 우선)
   let matchedSchema: SchemaEntry | null = null
-  if (!useFallback && !row._parseError) {
+  if (!row._parseError) {
     if (row._schemaId === null) {
-      // 미검증: 탐색 후 캐시
       const result = findMatchingSchema(schemas, displayData)
       row._schemaId = result?.id ?? ''
       matchedSchema = result
-    } else if (row._schemaId === '') {
-      // 캐시됨: 매칭 없음
-      matchedSchema = null
-    } else {
-      // 캐시됨: ID로 조회
+    } else if (row._schemaId !== '') {
       matchedSchema = schemas.find(s => s.id === row._schemaId) ?? null
       if (!matchedSchema) {
-        // 스키마가 삭제된 경우: 재탐색
+        // 스키마 삭제된 경우: 재탐색
         const result = findMatchingSchema(schemas, displayData)
         row._schemaId = result?.id ?? ''
         matchedSchema = result
@@ -71,6 +66,7 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
     }
   }
 
+  // useFallback은 렌더링 모드만 제어 — 스키마 탐색 결과와 분리
   const showViewer = !!(matchedSchema?.hasViewer && !useFallback)
 
   return (
