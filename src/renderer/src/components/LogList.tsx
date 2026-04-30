@@ -42,7 +42,7 @@ export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: Log
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '90px 60px 110px 1fr',
+          gridTemplateColumns: '155px 60px 110px 1fr',
           gap: 8,
           padding: '4px 12px',
           fontSize: 11,

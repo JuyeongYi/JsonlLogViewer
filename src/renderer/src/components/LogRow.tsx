@@ -19,7 +19,10 @@ interface LogRowProps {
 export function LogRow({ row, isSelected, onClick, onContextMenu }: LogRowProps): React.ReactElement {
   const levelColor = LEVEL_COLORS[String(row.level ?? '').toLowerCase()] ?? '#e2e8f0'
   const ts = row.timestamp ? String(row.timestamp) : '—'
-  const displayTs = ts.length > 19 ? ts.slice(11, 19) : ts
+  // ISO: 2024-01-01T10:00:00Z → "2024-01-01 10:00:00"
+  const displayTs = ts.length >= 19
+    ? ts.slice(0, 10) + ' ' + ts.slice(11, 19)
+    : ts
 
   return (
     <div
@@ -27,7 +30,7 @@ export function LogRow({ row, isSelected, onClick, onContextMenu }: LogRowProps)
       onContextMenu={onContextMenu}
       style={{
         display: 'grid',
-        gridTemplateColumns: '90px 60px 110px 1fr auto',
+        gridTemplateColumns: '155px 60px 110px 1fr auto',
         gap: 8,
         padding: '3px 12px',
         cursor: 'pointer',
