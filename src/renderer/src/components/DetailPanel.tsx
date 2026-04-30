@@ -125,7 +125,7 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
       <div style={{ display: 'flex', alignItems: 'center', padding: '4px 12px', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
         <span style={{ fontSize: 11, opacity: 0.5, flex: 1 }}>
           줄 #{row._lineNumber}
-          {matchedSchema && <span style={{ color: '#818cf8', marginLeft: 8 }}>● {matchedSchema.displayName}</span>}
+          {matchedSchema && <span style={{ color: 'var(--accent)', marginLeft: 8 }}>● {matchedSchema.displayName}</span>}
           {row._parseError && <span style={{ color: '#f87171', marginLeft: 8 }}>⚠ {row._parseError}</span>}
         </span>
         {matchedSchema?.hasViewer && (

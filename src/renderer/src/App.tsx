@@ -99,6 +99,8 @@ export default function App(): React.ReactElement {
     onPrevRow: () => setSelectedIndex(selectedIndex === null ? 0 : Math.max(selectedIndex - 1, 0)),
     onSearchMsg: () => msgInputRef.current?.focus(),
     onSearchCategory: () => categoryInputRef.current?.focus(),
+    onClearMsg: () => { setFilter({ ...activeState.filter, msgRegex: '' }); msgInputRef.current?.focus() },
+    onClearCategory: () => { setFilter({ ...activeState.filter, categoryRegex: '' }); categoryInputRef.current?.focus() },
     onNextTab: () => {
       const idx = tabs.findIndex(t => t.id === activeTabId)
       const next = tabs[(idx + 1) % tabs.length]
@@ -308,8 +310,8 @@ export default function App(): React.ReactElement {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* 툴바 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: '#16162a', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        <span style={{ fontWeight: 700, fontSize: 13, color: '#818cf8' }}>JsonlLogViewer</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'var(--bg-raised)', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--accent)' }}>JsonlLogViewer</span>
         {activeState.isLoading && <span style={{ fontSize: 12, opacity: 0.5 }}>로딩 중...</span>}
         {activeState.error && <span style={{ fontSize: 12, color: '#f87171' }}>오류: {activeState.error}</span>}
         <div style={{ flex: 1 }} />
@@ -367,7 +369,7 @@ export default function App(): React.ReactElement {
             {tabs.length === 0 ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 12, opacity: 0.4 }}>
                 <div style={{ fontSize: 14 }}>열린 파일이 없습니다</div>
-                <button onClick={handleOpenFile} style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', borderRadius: 4, color: '#a5b4fc', cursor: 'pointer', fontSize: 13, padding: '6px 16px' }}>
+                <button onClick={handleOpenFile} style={{ background: 'var(--accent-dim)', border: '1px solid var(--border-2)', borderRadius: 4, color: 'var(--accent-text)', cursor: 'pointer', fontSize: 13, padding: '6px 16px' }}>
                   파일 열기
                 </button>
               </div>
@@ -413,8 +415,8 @@ export default function App(): React.ReactElement {
             const isPinned = isCurrent && rowMenu.row._schemaPinned
             return (
               <button key={s.id} onClick={() => handleAssignSchema(rowMenu.row, s.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', background: 'none', border: 'none', color: isCurrent ? '#a5b4fc' : '#e2e8f0', cursor: 'pointer', padding: '6px 14px', fontSize: 13 }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.2)')}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', background: 'none', border: 'none', color: isCurrent ? 'var(--accent-text)' : '#e2e8f0', cursor: 'pointer', padding: '6px 14px', fontSize: 13 }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-dim)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'none')}
               >
                 <span style={{ width: 14, textAlign: 'center', fontSize: 11 }}>{isPinned ? '📌' : isCurrent ? '●' : ''}</span>

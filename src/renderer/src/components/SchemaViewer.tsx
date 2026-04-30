@@ -56,7 +56,7 @@ export function SchemaViewer({ row, schema, onFallback }: SchemaViewerProps): Re
 
   if (error) return (
     <div style={{ padding: 12, color: '#f87171', fontSize: 13 }}>
-      {error} — <button onClick={() => onFallbackRef.current()} style={{ color: '#a5b4fc', background: 'none', border: 'none', cursor: 'pointer' }}>JSON 트리로 보기</button>
+      {error} — <button onClick={() => onFallbackRef.current()} style={{ color: 'var(--accent-text)', background: 'none', border: 'none', cursor: 'pointer' }}>JSON 트리로 보기</button>
     </div>
   )
 
@@ -64,7 +64,7 @@ export function SchemaViewer({ row, schema, onFallback }: SchemaViewerProps): Re
     <iframe
       ref={iframeRef}
       sandbox="allow-scripts"
-      style={{ width: '100%', height: '100%', border: 'none', background: '#0f0f1a' }}
+      style={{ width: '100%', height: '100%', border: 'none', background: 'var(--bg)' }}
       title={`${schema.displayName} viewer`}
     />
   )

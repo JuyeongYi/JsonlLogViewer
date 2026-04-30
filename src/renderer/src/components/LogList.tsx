@@ -44,7 +44,7 @@ export function LogList({ rows, selectedIndex, onSelect, onRowContextMenu }: Log
           letterSpacing: '0.05em',
           opacity: 0.5,
           borderBottom: '1px solid rgba(255,255,255,0.1)',
-          background: '#1a1a2e',
+          background: 'var(--bg-raised)',
           flexShrink: 0,
         }}
       >

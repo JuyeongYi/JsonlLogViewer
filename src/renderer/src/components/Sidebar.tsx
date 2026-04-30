@@ -105,8 +105,8 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
                 cursor: draggable ? 'grab' : 'context-menu',
                 borderRadius: 4,
                 margin: '1px 4px',
-                background: isOver ? 'rgba(99,102,241,0.15)' : 'transparent',
-                borderTop: isOver ? '2px solid #818cf8' : '2px solid transparent',
+                background: isOver ? 'var(--accent-dim)' : 'transparent',
+                borderTop: isOver ? '2px solid var(--accent)' : '2px solid transparent',
                 opacity: dragIndex === globalIndex ? 0.4 : 1,
                 userSelect: 'none',
               }}
@@ -116,7 +116,7 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
                 <span style={{ opacity: 0.3, fontSize: 10 }}>⠿</span>
                 {s.displayName}
               </div>
-              {s.hasViewer && <div style={{ fontSize: 10, color: '#818cf8', opacity: 0.7, paddingLeft: 14 }}>HTML 뷰어</div>}
+              {s.hasViewer && <div style={{ fontSize: 10, color: 'var(--accent)', opacity: 0.7, paddingLeft: 14 }}>HTML 뷰어</div>}
             </div>
           )
         })}
@@ -134,7 +134,7 @@ export function Sidebar({ schemas, onOpenSchemaManagement, onEditSchema, onDelet
           <button
             onClick={() => { onEditSchema(contextMenu.schema); setContextMenu(null) }}
             style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer', padding: '6px 14px', fontSize: 13 }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.2)')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-dim)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}
           >
             ✏️ 편집

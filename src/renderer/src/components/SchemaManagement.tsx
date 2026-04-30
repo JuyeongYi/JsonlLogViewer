@@ -73,7 +73,7 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-      <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 'min(860px, 92vw)', height: '85vh', display: 'flex', flexDirection: 'column', padding: 20, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-raised)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 'min(860px, 92vw)', height: '85vh', display: 'flex', flexDirection: 'column', padding: 20, overflow: 'hidden' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, alignItems: 'center' }}>
           <h3 style={{ fontSize: 15 }}>{isEditing ? `스키마 편집 — ${editTarget.displayName}` : '스키마 관리'}</h3>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -112,7 +112,7 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
                 <div key={s.id} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', gap: 8 }}>
                   <span style={{ flex: 1, fontSize: 13 }}>{s.displayName}</span>
                   <span style={{ fontSize: 11, opacity: 0.4 }}>{s.id}</span>
-                  {s.hasViewer && <span style={{ fontSize: 11, color: '#818cf8' }}>HTML 뷰어</span>}
+                  {s.hasViewer && <span style={{ fontSize: 11, color: 'var(--accent)' }}>HTML 뷰어</span>}
                   <button onClick={() => onDelete(s.id)} style={{ background: 'none', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 3, color: '#f87171', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>삭제</button>
                 </div>
               ))
@@ -178,7 +178,7 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
         <button
           onClick={handleSave}
           disabled={saving || !id}
-          style={{ background: 'rgba(99,102,241,0.3)', border: '1px solid rgba(99,102,241,0.5)', borderRadius: 4, color: '#a5b4fc', cursor: 'pointer', fontSize: 13, padding: '5px 16px' }}
+          style={{ background: 'var(--accent-dim)', border: '1px solid var(--border-2)', borderRadius: 4, color: 'var(--accent-text)', cursor: 'pointer', fontSize: 13, padding: '5px 16px' }}
         >
           {saving ? '저장 중...' : isEditing ? '저장' : '등록'}
         </button>

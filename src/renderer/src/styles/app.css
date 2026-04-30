@@ -1,9 +1,59 @@
-/* src/renderer/src/styles/app.css */
+/* ── 다크 모드 (기본) ── */
+:root {
+  color-scheme: dark light;
+
+  --bg:          #1c1c1e;
+  --bg-raised:   #2c2c2e;
+  --bg-elevated: #3a3a3c;
+  --bg-overlay:  #111113;
+
+  --text:        #e5e5ea;
+  --text-2:      #aeaeb2;
+  --text-3:      #636366;
+
+  --border:      rgba(255,255,255,0.08);
+  --border-2:    rgba(255,255,255,0.14);
+
+  /* 액센트: OS가 없으면 중립 파랑 */
+  --accent:      #0a84ff;
+  --accent-dim:  rgba(10,132,255,0.18);
+  --accent-text: #64b5f6;
+
+  --scrollbar:   rgba(255,255,255,0.15);
+  --placeholder: rgba(255,255,255,0.3);
+  --select-bg:   #2c2c2e;
+}
+
+/* ── 라이트 모드 ── */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:          #f2f2f7;
+    --bg-raised:   #ffffff;
+    --bg-elevated: #e5e5ea;
+    --bg-overlay:  #ffffff;
+
+    --text:        #1c1c1e;
+    --text-2:      #3a3a3c;
+    --text-3:      #aeaeb2;
+
+    --border:      rgba(0,0,0,0.08);
+    --border-2:    rgba(0,0,0,0.15);
+
+    --accent:      #007aff;
+    --accent-dim:  rgba(0,122,255,0.12);
+    --accent-text: #0055cc;
+
+    --scrollbar:   rgba(0,0,0,0.18);
+    --placeholder: rgba(0,0,0,0.3);
+    --select-bg:   #f2f2f7;
+  }
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #0f0f1a;
-  color: #e2e8f0;
+  background: var(--bg);
+  color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   height: 100vh;
   overflow: hidden;
@@ -13,8 +63,8 @@ body {
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
 
-button:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
-input::placeholder { color: rgba(255,255,255,0.25); }
-select option { background: #1e1e2e; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input::placeholder { color: var(--placeholder); }
+select option { background: var(--select-bg); }

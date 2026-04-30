@@ -42,7 +42,7 @@ interface TabBarProps {
 
 export function TabBar({ tabs, activeTabId, newRowTabs, onSelect, onClose, onOpen }: TabBarProps): React.ReactElement {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', background: '#13132a', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0, overflowX: 'auto' }}>
+    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-raised)', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0, overflowX: 'auto' }}>
       {tabs.map(tab => {
         const dotLevel = newRowTabs.get(tab.id)
         const hasNew = !!dotLevel
@@ -55,8 +55,8 @@ export function TabBar({ tabs, activeTabId, newRowTabs, onSelect, onClose, onOpe
               display: 'flex', alignItems: 'center', gap: 4,
               padding: '6px 14px', cursor: 'pointer', whiteSpace: 'nowrap',
               borderRight: '1px solid rgba(255,255,255,0.06)',
-              background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-              color: isActive ? '#a5b4fc' : '#94a3b8',
+              background: isActive ? 'var(--accent-dim)' : 'transparent',
+              color: isActive ? 'var(--accent-text)' : 'var(--text-2)',
               fontSize: 12, flexShrink: 0,
             }}
           >

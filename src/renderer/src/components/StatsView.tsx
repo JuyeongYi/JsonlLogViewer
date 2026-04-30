@@ -34,7 +34,7 @@ export function StatsView({ rows }: StatsViewProps): React.ReactElement {
           {allFields.map(f => <option key={f} value={f}>{f}</option>)}
         </select>
         {stats.fieldDistribution && Object.entries(stats.fieldDistribution).sort(([,a],[,b]) => b-a).slice(0, 20).map(([val, count]) => (
-          <LevelBar key={val} level={val} count={count} total={stats.total} color="#818cf8" />
+          <LevelBar key={val} level={val} count={count} total={stats.total} color="var(--accent)" />
         ))}
       </div>
     </div>

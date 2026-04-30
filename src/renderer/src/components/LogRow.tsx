@@ -31,7 +31,7 @@ export function LogRow({ row, isSelected, onClick, onContextMenu }: LogRowProps)
         gap: 8,
         padding: '3px 12px',
         cursor: 'pointer',
-        background: isSelected ? 'rgba(99,102,241,0.2)' : 'transparent',
+        background: isSelected ? 'var(--accent-dim)' : 'transparent',
         borderBottom: '1px solid rgba(255,255,255,0.04)',
         fontSize: 13,
         fontFamily: 'monospace',
@@ -52,7 +52,7 @@ export function LogRow({ row, isSelected, onClick, onContextMenu }: LogRowProps)
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         {row._schemaPinned && (
-          <span title="스키마 수동 지정됨" style={{ fontSize: 10, color: '#818cf8', opacity: 0.7 }}>📌</span>
+          <span title="스키마 수동 지정됨" style={{ fontSize: 10, color: 'var(--accent)', opacity: 0.7 }}>📌</span>
         )}
         {row._parseError && (
           <span title={row._parseError} style={{ color: '#f87171', fontSize: 14 }}>⚠</span>
