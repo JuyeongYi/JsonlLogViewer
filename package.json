@@ -6,6 +6,7 @@
   "author": "JuyeongYi",
   "homepage": "https://github.com/JuyeongYi/JsonlLogViewer",
   "scripts": {
+    "test": "vitest run",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
