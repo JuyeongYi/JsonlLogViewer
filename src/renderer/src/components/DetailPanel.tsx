@@ -148,16 +148,14 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
         {/* 스키마 / 에러 뱃지 */}
         {matchedSchema && <span style={{ fontSize: 10, color: 'var(--accent)', flexShrink: 0 }}>● {matchedSchema.displayName}</span>}
         {row._parseError && <span style={{ fontSize: 10, color: '#f87171', flexShrink: 0 }}>⚠ {row._parseError}</span>}
-      </div>
+        {/* 뷰어 전환 + 닫기 */}
         {matchedSchema?.hasViewer && (
-          <button
-            onClick={() => setUseFallback(f => !f)}
-            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 11, marginRight: 8 }}
-          >
-            {useFallback ? '↩ 뷰어로 복구' : 'JSON 트리로 보기'}
+          <button onClick={() => setUseFallback(f => !f)}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 11, flexShrink: 0 }}>
+            {useFallback ? '↩ 뷰어' : 'JSON 트리'}
           </button>
         )}
-        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 14, padding: '0 4px' }}>✕</button>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 14, padding: '0 4px', flexShrink: 0 }}>✕</button>
       </div>
 
       {/* 콘텐츠 */}
