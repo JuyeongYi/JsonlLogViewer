@@ -108,6 +108,8 @@ export default function App(): React.ReactElement {
     onToggleWarn:  () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'warn') }),
     onToggleInfo:  () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'info') }),
     onToggleDebug: () => setFilter({ ...activeState.filter, levels: toggleLevel(activeState.filter.levels, 'debug') }),
+    onNextView: () => setViewMode(v => { const V: ViewMode[] = ['list','stats','timeline','diff']; return V[(V.indexOf(v)+1)%V.length] }),
+    onPrevView: () => setViewMode(v => { const V: ViewMode[] = ['list','stats','timeline','diff']; return V[(V.indexOf(v)-1+V.length)%V.length] }),
     onNextTab: () => {  // ] → 다음 탭
       const idx = tabs.findIndex(t => t.id === activeTabId)
       const next = tabs[(idx + 1) % tabs.length]

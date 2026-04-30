@@ -13,6 +13,8 @@ export interface ShortcutHandlers {
   onToggleDebug: () => void    // Ctrl+r → debug 토글
   onNextTab: () => void        // ] → 다음 탭
   onPrevTab: () => void        // [ → 이전 탭
+  onNextView: () => void       // } → 다음 뷰
+  onPrevView: () => void       // { → 이전 뷰
   onCloseDetail: () => void
   onOpenFile: () => void
 }
@@ -28,6 +30,8 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
         if (e.key === 'k' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onPrevRow() }
         if (e.key === ']') { e.preventDefault(); handlers.onNextTab() }
         if (e.key === '[') { e.preventDefault(); handlers.onPrevTab() }
+        if (e.key === '}') { e.preventDefault(); handlers.onNextView() }
+        if (e.key === '{') { e.preventDefault(); handlers.onPrevView() }
         if (e.key === 'i' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchMsg() }
         if (e.key === 'u' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); handlers.onSearchCategory() }
         if (e.key === 'Escape') { e.preventDefault(); handlers.onCloseDetail() }

@@ -59,10 +59,10 @@ export function FilterBar({ filter, totalCount, filteredCount, onChange, msgInpu
   const inputStyle = (invalid: boolean): React.CSSProperties => ({
     flex: 1,
     background: 'transparent',
-    border: `1px solid ${invalid ? '#f87171' : 'rgba(255,255,255,0.1)'}`,
+    border: `1px solid ${invalid ? '#f87171' : 'var(--border)'}`,
     borderRadius: 4,
     outline: 'none',
-    color: invalid ? '#f87171' : '#e2e8f0',
+    color: invalid ? '#f87171' : 'var(--text-2)',
     fontSize: 12,
     fontFamily: 'monospace',
     padding: '2px 6px',

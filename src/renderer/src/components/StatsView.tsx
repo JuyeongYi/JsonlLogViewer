@@ -41,11 +41,11 @@ export function StatsView({ rows }: StatsViewProps): React.ReactElement {
   )
 }
 
-function StatCard({ label, value, color = '#e2e8f0' }: { label: string; value: string; color?: string }) {
+function StatCard({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '12px 16px', minWidth: 100 }}>
       <div style={{ fontSize: 11, opacity: 0.5, marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 20, fontWeight: 700, color }}>{value}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: color ?? 'var(--text)' }}>{value}</div>
     </div>
   )
 }
