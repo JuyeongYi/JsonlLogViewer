@@ -118,7 +118,7 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
       {/* 드래그 핸들 (세로) */}
       <div
         onMouseDown={onVDragStart}
-        style={{ height: 4, cursor: 'ns-resize', background: 'transparent', flexShrink: 0, borderTop: '2px solid rgba(255,255,255,0.06)' }}
+        style={{ height: 5, cursor: 'ns-resize', background: 'var(--border-2)', flexShrink: 0 }}
         title="드래그해서 패널 높이 조절"
       />
       {/* 헤더: 타임스탬프 레벨 카테고리 메시지 */}
@@ -173,7 +173,7 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
             {/* 가로 드래그 핸들 */}
             <div
               onMouseDown={onHDragStart}
-              style={{ width: 4, cursor: 'ew-resize', flexShrink: 0, background: 'rgba(255,255,255,0.06)', borderLeft: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ width: 5, cursor: 'ew-resize', flexShrink: 0, background: 'var(--border-2)' }}
             />
             <div style={{ width: jsonTreeWidth, overflow: 'auto', padding: 10, fontSize: 12, fontFamily: 'monospace', flexShrink: 0 }}>
               <JsonTree data={displayData} />
