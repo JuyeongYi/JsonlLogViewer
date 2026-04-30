@@ -37,7 +37,7 @@ describe('useLogFile', () => {
   it('레벨 단일 선택 필터가 동작한다', async () => {
     const { result } = renderHook(() => useLogFile())
     await act(() => result.current.openFile())
-    act(() => result.current.setFilter({ levels: ['error'], sortOrder: 'asc', msgRegex: '' }))
+    act(() => result.current.setFilter({ levels: ['error'], sortOrder: 'asc', msgRegex: '', categoryRegex: '' }))
     expect(result.current.filteredRows).toHaveLength(1)
     expect(result.current.filteredRows[0].level).toBe('error')
   })
@@ -45,21 +45,21 @@ describe('useLogFile', () => {
   it('레벨 복수 선택 시 두 레벨 모두 표시된다', async () => {
     const { result } = renderHook(() => useLogFile())
     await act(() => result.current.openFile())
-    act(() => result.current.setFilter({ levels: ['error', 'warn'], sortOrder: 'asc', msgRegex: '' }))
+    act(() => result.current.setFilter({ levels: ['error', 'warn'], sortOrder: 'asc', msgRegex: '', categoryRegex: '' }))
     expect(result.current.filteredRows).toHaveLength(2)
   })
 
   it('msg 정규식 필터가 동작한다', async () => {
     const { result } = renderHook(() => useLogFile())
     await act(() => result.current.openFile())
-    act(() => result.current.setFilter({ levels: [], sortOrder: 'asc', msgRegex: 'fail|Slow' }))
+    act(() => result.current.setFilter({ levels: [], sortOrder: 'asc', msgRegex: 'fail|Slow', categoryRegex: '' }))
     expect(result.current.filteredRows).toHaveLength(2)
   })
 
   it('내림차순 정렬 시 최신 항목이 먼저 온다', async () => {
     const { result } = renderHook(() => useLogFile())
     await act(() => result.current.openFile())
-    act(() => result.current.setFilter({ levels: [], sortOrder: 'desc', msgRegex: '' }))
+    act(() => result.current.setFilter({ levels: [], sortOrder: 'desc', msgRegex: '', categoryRegex: '' }))
     expect(result.current.filteredRows[0].msg).toBe('Slow query')
   })
 

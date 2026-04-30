@@ -13,33 +13,32 @@ interface FilterBarProps {
   onChange: (filter: FilterState) => void
 }
 
-export function FilterBar({ filter, totalCount, filteredCount, onChange }: FilterBarProps): React.ReactElement {
-  const [localRegex, setLocalRegex] = useState(filter.msgRegex)
-  const [regexError, setRegexError] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+function useRegexInput(
+  externalValue: string,
+  onCommit: (value: string) => void
+) {
+  const [local, setLocal] = useState(externalValue)
+  const [invalid, setInvalid] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Sync local state if parent resets filter externally
-  useEffect(() => {
-    setLocalRegex(filter.msgRegex)
-  }, [filter.msgRegex])
+  useEffect(() => { setLocal(externalValue) }, [externalValue])
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
 
-  const handleMsgRegex = (value: string) => {
-    setLocalRegex(value)
-
+  const handle = (value: string) => {
+    setLocal(value)
     let valid = true
     try { if (value) new RegExp(value) } catch { valid = false }
-    setRegexError(!valid)
-
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      if (valid) onChange({ ...filter, msgRegex: value })
-    }, 500)
+    setInvalid(!valid)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => { if (valid) onCommit(value) }, 500)
   }
 
-  // Cleanup debounce on unmount
-  useEffect(() => () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-  }, [])
+  return { local, invalid, handle }
+}
+
+export function FilterBar({ filter, totalCount, filteredCount, onChange }: FilterBarProps): React.ReactElement {
+  const msg = useRegexInput(filter.msgRegex, v => onChange({ ...filter, msgRegex: v }))
+  const cat = useRegexInput(filter.categoryRegex, v => onChange({ ...filter, categoryRegex: v }))
 
   const toggleLevel = (level: string) => {
     const next = filter.levels.includes(level)
@@ -48,9 +47,21 @@ export function FilterBar({ filter, totalCount, filteredCount, onChange }: Filte
     onChange({ ...filter, levels: next })
   }
 
-  const toggleSort = () => {
+  const toggleSort = () =>
     onChange({ ...filter, sortOrder: filter.sortOrder === 'asc' ? 'desc' : 'asc' })
-  }
+
+  const inputStyle = (invalid: boolean): React.CSSProperties => ({
+    flex: 1,
+    background: 'transparent',
+    border: `1px solid ${invalid ? '#f87171' : 'rgba(255,255,255,0.1)'}`,
+    borderRadius: 4,
+    outline: 'none',
+    color: invalid ? '#f87171' : '#e2e8f0',
+    fontSize: 12,
+    fontFamily: 'monospace',
+    padding: '2px 6px',
+    minWidth: 80,
+  })
 
   return (
     <div style={{
@@ -68,15 +79,7 @@ export function FilterBar({ filter, totalCount, filteredCount, onChange }: Filte
         <span style={{ fontSize: 11, opacity: 0.4 }}>시간:</span>
         <button
           onClick={toggleSort}
-          style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 4,
-            color: '#e2e8f0',
-            cursor: 'pointer',
-            fontSize: 12,
-            padding: '2px 8px',
-          }}
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 4, color: '#e2e8f0', cursor: 'pointer', fontSize: 12, padding: '2px 8px' }}
         >
           {filter.sortOrder === 'asc' ? '↑ 오름차순' : '↓ 내림차순'}
         </button>
@@ -86,41 +89,25 @@ export function FilterBar({ filter, totalCount, filteredCount, onChange }: Filte
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 11, opacity: 0.4, whiteSpace: 'nowrap' }}>레벨:</span>
         {LEVELS.map(level => (
-          <label key={level} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12 }}>
-            <input
-              type="checkbox"
-              checked={filter.levels.includes(level)}
-              onChange={() => toggleLevel(level)}
-              style={{ accentColor: LEVEL_COLORS[level], cursor: 'pointer' }}
-            />
-            <span style={{ color: LEVEL_COLORS[level], fontWeight: 600, textTransform: 'uppercase', fontSize: 11 }}>
-              {level}
-            </span>
+          <label key={level} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+            <input type="checkbox" checked={filter.levels.includes(level)} onChange={() => toggleLevel(level)} style={{ accentColor: LEVEL_COLORS[level], cursor: 'pointer' }} />
+            <span style={{ color: LEVEL_COLORS[level], fontWeight: 600, textTransform: 'uppercase', fontSize: 11 }}>{level}</span>
           </label>
         ))}
       </div>
 
+      {/* 카테고리 정규식 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 140 }}>
+        <span style={{ fontSize: 11, opacity: 0.4, whiteSpace: 'nowrap' }}>카테고리:</span>
+        <input type="text" placeholder="session|perf" value={cat.local} onChange={e => cat.handle(e.target.value)} style={inputStyle(cat.invalid)} />
+        {cat.invalid && <span style={{ fontSize: 11, color: '#f87171' }}>!</span>}
+      </div>
+
       {/* msg 정규식 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 160 }}>
-        <span style={{ fontSize: 11, opacity: 0.4, whiteSpace: 'nowrap' }}>msg 정규식:</span>
-        <input
-          type="text"
-          placeholder="예: error|fail|timeout"
-          value={localRegex}
-          onChange={e => handleMsgRegex(e.target.value)}
-          style={{
-            flex: 1,
-            background: 'transparent',
-            border: `1px solid ${regexError ? '#f87171' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: 4,
-            outline: 'none',
-            color: regexError ? '#f87171' : '#e2e8f0',
-            fontSize: 12,
-            fontFamily: 'monospace',
-            padding: '2px 6px',
-          }}
-        />
-        {regexError && <span style={{ fontSize: 11, color: '#f87171', whiteSpace: 'nowrap' }}>잘못된 정규식</span>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 140 }}>
+        <span style={{ fontSize: 11, opacity: 0.4, whiteSpace: 'nowrap' }}>msg:</span>
+        <input type="text" placeholder="error|fail" value={msg.local} onChange={e => msg.handle(e.target.value)} style={inputStyle(msg.invalid)} />
+        {msg.invalid && <span style={{ fontSize: 11, color: '#f87171' }}>!</span>}
       </div>
 
       {/* 카운트 */}

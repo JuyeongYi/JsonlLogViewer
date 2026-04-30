@@ -1,0 +1,152 @@
+<!-- 스키마 관리 → 새 스키마 → viewer.html 란에 이 파일 내용 전체를 붙여넣기 -->
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f0f1a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 12px; font-size: 13px; line-height: 1.5; }
+.header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; }
+.badge { padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.lv-info  { background: rgba(74,222,128,0.15);  color: #4ade80; }
+.lv-warn  { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+.lv-error { background: rgba(248,113,113,0.15); color: #f87171; }
+.lv-debug { background: rgba(148,163,184,0.15); color: #94a3b8; }
+.event-type { background: rgba(129,140,248,0.15); color: #818cf8; padding: 1px 7px; border-radius: 4px; font-size: 11px; }
+.msg { font-weight: 600; font-size: 14px; flex: 1; }
+.ts  { font-size: 11px; opacity: 0.4; white-space: nowrap; }
+
+.section { margin-bottom: 14px; }
+.section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 5px; }
+.kv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px; }
+.kv { background: rgba(255,255,255,0.04); border-radius: 5px; padding: 5px 8px; }
+.kv-key { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1px; }
+.kv-val { font-size: 13px; font-family: monospace; }
+.val-str { color: #86efac; }
+.val-num { color: #93c5fd; font-weight: 600; }
+.val-bool-t { color: #4ade80; }
+.val-bool-f { color: #f87171; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead tr { background: rgba(255,255,255,0.06); }
+th { text-align: left; padding: 5px 10px; color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; white-space: nowrap; }
+td { padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+tbody tr:hover td { background: rgba(255,255,255,0.03); }
+.badge-over { background: rgba(248,113,113,0.2); color: #f87171; padding: 0 5px; border-radius: 3px; font-size: 10px; margin-left: 4px; }
+.badge-ok   { background: rgba(74,222,128,0.15);  color: #4ade80; padding: 0 5px; border-radius: 3px; font-size: 10px; margin-left: 4px; }
+.obj-block { background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px 12px; }
+.tag { display: inline-block; background: rgba(129,140,248,0.15); color: #a5b4fc; border-radius: 3px; padding: 1px 6px; font-size: 11px; margin: 2px; }
+</style>
+
+<div id="root"><div style="opacity:.3;padding:20px">데이터 로딩 중...</div></div>
+
+<script>
+const LC = { info:'lv-info', warn:'lv-warn', warning:'lv-warn', error:'lv-error', debug:'lv-debug' }
+const SKIP = new Set(['timestamp','level','msg','event_type','category','session_id'])
+
+function fmtVal(v) {
+  if (v === null || v === undefined) return '<span style="opacity:.3">—</span>'
+  if (typeof v === 'boolean') return v ? '<span class="val-bool-t">true</span>' : '<span class="val-bool-f">false</span>'
+  if (typeof v === 'number')  return `<span class="val-num">${v.toLocaleString()}</span>`
+  if (typeof v === 'string')  return `<span class="val-str">${v}</span>`
+  if (Array.isArray(v))       return `<span style="opacity:.5">[${v.length}개]</span>`
+  return `<span style="opacity:.5">{…}</span>`
+}
+
+function renderKV(entries) {
+  return `<div class="kv-grid">${entries.map(([k,v]) =>
+    `<div class="kv"><div class="kv-key">${k}</div><div class="kv-val">${fmtVal(v)}</div></div>`
+  ).join('')}</div>`
+}
+
+function renderTable(arr, extraColFn) {
+  if (!arr?.length) return ''
+  const keys = [...new Set(arr.flatMap(r => Object.keys(r)))]
+  const head = keys.map(k => `<th>${k}</th>`).join('')
+  const body = arr.map(r => {
+    const cells = keys.map(k => {
+      const v = r[k]
+      let extra = ''
+      if (extraColFn) extra = extraColFn(k, v, r)
+      return `<td>${fmtVal(v)}${extra}</td>`
+    }).join('')
+    return `<tr>${cells}</tr>`
+  }).join('')
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`
+}
+
+function renderStringArray(arr) {
+  return arr.map(s => `<span class="tag">${s}</span>`).join('')
+}
+
+window.addEventListener('message', e => {
+  if (e.data.type !== 'LOG_DATA') return
+  const d = e.data.payload
+
+  const ts = d.timestamp ? new Date(d.timestamp).toLocaleString('ko-KR') : ''
+  const lc = LC[String(d.level||'').toLowerCase()] || 'lv-info'
+
+  const scalars = Object.entries(d).filter(([k,v]) => !SKIP.has(k) && typeof v !== 'object' && !Array.isArray(v))
+  const arrays  = Object.entries(d).filter(([k,v]) => Array.isArray(v))
+  const objects = Object.entries(d).filter(([k,v]) => v && typeof v === 'object' && !Array.isArray(v))
+
+  let sections = ''
+
+  // 기본 KV
+  if (scalars.length) {
+    sections += `<div class="section">
+      <div class="section-title">기본 정보</div>
+      ${renderKV(scalars)}
+    </div>`
+  }
+
+  // 객체 필드 (rewards 등)
+  for (const [k, v] of objects) {
+    const entries = Object.entries(v as object)
+    sections += `<div class="section">
+      <div class="section-title">${k}</div>
+      <div class="obj-block">${renderKV(entries)}</div>
+    </div>`
+  }
+
+  // 배열 필드
+  for (const [k, v] of arrays) {
+    const arr = v as unknown[]
+    if (!arr.length) continue
+
+    // 문자열 배열은 태그로 표시
+    if (typeof arr[0] === 'string') {
+      sections += `<div class="section">
+        <div class="section-title">${k}</div>
+        <div>${renderStringArray(arr as string[])}</div>
+      </div>`
+      continue
+    }
+
+    // 객체 배열은 테이블
+    const isPerf = k === 'metrics'
+    const table = renderTable(arr as Record<string,unknown>[], isPerf ? (col, val, row) => {
+      if (col === 'ms' && row.budget_ms) {
+        const over = (val as number) > (row.budget_ms as number)
+        return over
+          ? `<span class="badge-over">예산 초과</span>`
+          : `<span class="badge-ok">정상</span>`
+      }
+      return ''
+    } : undefined)
+
+    sections += `<div class="section">
+      <div class="section-title">${k}</div>
+      ${table}
+    </div>`
+  }
+
+  document.getElementById('root').innerHTML = `
+    <div class="header">
+      <span class="badge ${lc}">${d.level||''}</span>
+      <span class="event-type">${d.event_type||''}</span>
+      ${d.category ? `<span style="font-size:11px;opacity:.5">${d.category}</span>` : ''}
+      ${d.session_id ? `<span style="font-size:11px;color:#818cf8;opacity:.7">#${d.session_id}</span>` : ''}
+      <span class="msg">${d.msg||''}</span>
+      <span class="ts">${ts}</span>
+    </div>
+    ${sections}
+  `
+})
+</script>

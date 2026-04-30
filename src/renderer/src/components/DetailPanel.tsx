@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import type { LogRow, SchemaEntry } from '../types'
 import { JsonTree } from './JsonTree'
 import { SchemaViewer } from './SchemaViewer'
@@ -13,6 +13,26 @@ interface DetailPanelProps {
 export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.ReactElement {
   const [useFallback, setUseFallback] = useState(false)
   const handleFallback = useCallback(() => setUseFallback(true), [])
+
+  // 드래그 리사이즈
+  const [panelHeight, setPanelHeight] = useState(280)
+  const dragRef = useRef<{ startY: number; startH: number } | null>(null)
+
+  const onDragStart = (e: React.MouseEvent) => {
+    dragRef.current = { startY: e.clientY, startH: panelHeight }
+    const onMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return
+      const delta = dragRef.current.startY - ev.clientY
+      setPanelHeight(Math.max(120, Math.min(window.innerHeight * 0.75, dragRef.current.startH + delta)))
+    }
+    const onUp = () => {
+      dragRef.current = null
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
 
   useEffect(() => { setUseFallback(false) }, [row])
 
@@ -54,7 +74,13 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
   const showViewer = !!(matchedSchema?.hasViewer && !useFallback)
 
   return (
-    <div style={{ height: 200, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: panelHeight, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
+      {/* 드래그 핸들 */}
+      <div
+        onMouseDown={onDragStart}
+        style={{ height: 4, cursor: 'ns-resize', background: 'transparent', flexShrink: 0, borderTop: '2px solid rgba(255,255,255,0.06)' }}
+        title="드래그해서 패널 높이 조절"
+      />
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '4px 12px', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
         <span style={{ fontSize: 11, opacity: 0.5, flex: 1 }}>

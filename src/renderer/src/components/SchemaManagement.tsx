@@ -52,7 +52,7 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-      <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 560, maxHeight: '80vh', overflow: 'auto', padding: 20 }}>
+      <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, width: 'min(860px, 92vw)', height: '85vh', display: 'flex', flexDirection: 'column', padding: 20, overflow: 'hidden' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
           <h3 style={{ fontSize: 15 }}>{isEditing ? `스키마 편집 — ${editTarget.displayName}` : '스키마 관리'}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 16 }}>✕</button>
@@ -91,20 +91,26 @@ export function SchemaManagement({ schemas, onSave, onDelete, onClose, editTarge
             style={{ ...inputStyle, flex: 1 }}
           />
         </div>
-        <textarea
-          rows={6}
-          placeholder="JSON Schema"
-          value={schemaJson}
-          onChange={e => setSchemaJson(e.target.value)}
-          style={{ ...inputStyle, display: 'block', marginBottom: 8, resize: 'vertical' }}
-        />
-        <textarea
-          rows={4}
-          placeholder="viewer.html (선택사항)"
-          value={viewerHtml}
-          onChange={e => setViewerHtml(e.target.value)}
-          style={{ ...inputStyle, display: 'block', marginBottom: 8, resize: 'vertical' }}
-        />
+        <div style={{ display: 'flex', gap: 10, flex: 1, minHeight: 0, marginBottom: 8 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>JSON Schema</div>
+            <textarea
+              placeholder='{"type":"object","required":["timestamp","level","msg"]}'
+              value={schemaJson}
+              onChange={e => setSchemaJson(e.target.value)}
+              style={{ ...inputStyle, flex: 1, resize: 'none' }}
+            />
+          </div>
+          <div style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, opacity: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>viewer.html <span style={{ opacity: 0.5 }}>(선택사항)</span></div>
+            <textarea
+              placeholder="<style>...</style>&#10;<div id=&quot;root&quot;></div>&#10;<script>window.addEventListener('message', e => { ... })</script>"
+              value={viewerHtml}
+              onChange={e => setViewerHtml(e.target.value)}
+              style={{ ...inputStyle, flex: 1, resize: 'none', fontFamily: 'monospace' }}
+            />
+          </div>
+        </div>
         {error && <div style={{ color: '#f87171', fontSize: 12, marginBottom: 8 }}>{error}</div>}
         <button
           onClick={handleSave}

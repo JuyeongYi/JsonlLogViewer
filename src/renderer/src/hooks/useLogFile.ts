@@ -22,9 +22,15 @@ function applyFilter(rows: LogRow[], filter: FilterState): LogRow[] {
     try {
       const re = new RegExp(filter.msgRegex)
       result = result.filter(row => re.test(String(row.msg ?? '')))
-    } catch {
-      // invalid regex — skip this filter
-    }
+    } catch { /* invalid regex */ }
+  }
+
+  // 3. Category regex filter
+  if (filter.categoryRegex) {
+    try {
+      const re = new RegExp(filter.categoryRegex)
+      result = result.filter(row => re.test(String(row.category ?? '')))
+    } catch { /* invalid regex */ }
   }
 
   // 4. Sort by timestamp
@@ -40,7 +46,7 @@ export function useLogFile() {
     path: null,
     rows: [],
     filteredRows: [],
-    filter: { levels: [], sortOrder: 'asc', msgRegex: '' },
+    filter: { levels: [], sortOrder: 'asc', msgRegex: '', categoryRegex: '' },
     isLoading: false,
     error: null,
   })

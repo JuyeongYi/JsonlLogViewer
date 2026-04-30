@@ -12,7 +12,8 @@ export interface LogRow {
 export interface FilterState {
   levels: string[]       // 선택된 레벨 목록 (빈 배열 = 전체)
   sortOrder: 'asc' | 'desc'  // timestamp 기준 정렬
-  msgRegex: string       // msg 필드 정규식 필터 (빈 문자열 = 비활성)
+  msgRegex: string       // msg 필드 정규식 필터
+  categoryRegex: string  // category 필드 정규식 필터
 }
 
 // window.fileApi 타입 선언 (preload contextBridge)
