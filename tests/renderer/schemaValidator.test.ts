@@ -52,6 +52,56 @@ describe('findMatchingSchema', () => {
     expect(findMatchingSchema(schemas, row)?.id).toBe('specific')
   })
 
+  it('properties 타입 검증 — 타입이 맞지 않으면 매칭 실패', () => {
+    const schemas = [{
+      id: 'typed', displayName: 'typed',
+      schema: {
+        type: 'object',
+        required: ['status_code'],
+        properties: { status_code: { type: 'integer' } }
+      },
+      hasViewer: false, viewerPath: null,
+    }]
+    // string이면 매칭 실패
+    expect(findMatchingSchema(schemas, { status_code: 'not-a-number' })).toBeNull()
+    // integer면 매칭 성공
+    expect(findMatchingSchema(schemas, { status_code: 200 })?.id).toBe('typed')
+  })
+
+  it('enum 검증 — 허용 값이 아니면 매칭 실패', () => {
+    const schemas = [{
+      id: 'method', displayName: 'method',
+      schema: {
+        type: 'object',
+        required: ['method'],
+        properties: { method: { type: 'string', enum: ['GET','POST','PUT','DELETE'] } }
+      },
+      hasViewer: false, viewerPath: null,
+    }]
+    expect(findMatchingSchema(schemas, { method: 'INVALID' })).toBeNull()
+    expect(findMatchingSchema(schemas, { method: 'GET' })?.id).toBe('method')
+  })
+
+  it('중첩 객체 properties 검증', () => {
+    const schemas = [{
+      id: 'nested', displayName: 'nested',
+      schema: {
+        type: 'object',
+        required: ['user'],
+        properties: {
+          user: {
+            type: 'object',
+            required: ['id'],
+            properties: { id: { type: 'integer' } }
+          }
+        }
+      },
+      hasViewer: false, viewerPath: null,
+    }]
+    expect(findMatchingSchema(schemas, { user: { id: 'not-int' } })).toBeNull()
+    expect(findMatchingSchema(schemas, { user: { id: 42 } })?.id).toBe('nested')
+  })
+
   it('row.schema 힌트 스키마가 JSON Schema 검증 실패 시 일반 순서로 폴백', () => {
     const schemas = [
       makeSchema('fallback', ['level']),

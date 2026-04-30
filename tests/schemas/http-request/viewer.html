@@ -1,0 +1,56 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0f1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:12px;font-size:13px}
+.top{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.method{padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px}
+.GET{background:rgba(74,222,128,.2);color:#4ade80}
+.POST{background:rgba(251,191,36,.2);color:#fbbf24}
+.PUT{background:rgba(129,140,248,.2);color:#818cf8}
+.DELETE{background:rgba(248,113,113,.2);color:#f87171}
+.PATCH{background:rgba(251,146,60,.2);color:#fb923c}
+.s2{background:rgba(74,222,128,.15);color:#4ade80}
+.s3{background:rgba(129,140,248,.15);color:#818cf8}
+.s4{background:rgba(251,191,36,.15);color:#fbbf24}
+.s5{background:rgba(248,113,113,.15);color:#f87171}
+.badge{padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px}
+.path{font-family:monospace;font-size:14px;font-weight:600;flex:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.box{background:rgba(255,255,255,.04);border-radius:6px;padding:8px 10px}
+.box-title{font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:6px}
+.row{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.row:last-child{border:none}
+.hk{color:#94a3b8;min-width:120px;flex-shrink:0}
+.hv{word-break:break-all}
+.meta{font-size:11px;color:#64748b}
+</style>
+<div id="root"></div>
+<script>
+var MC={'GET':'GET','POST':'POST','PUT':'PUT','DELETE':'DELETE','PATCH':'PATCH'};
+var SC=function(s){return s>=500?'s5':s>=400?'s4':s>=300?'s3':'s2'};
+var SZ=function(b){return b===undefined||b===null?'':b>=1024?(b/1024).toFixed(1)+' KB':b+' B'};
+function hdrs(obj,title){
+  if(!obj)return '';
+  var rows=Object.entries(obj).map(function(e){
+    return '<div class="row"><span class="hk">'+e[0]+'</span><span class="hv">'+e[1]+'</span></div>';
+  }).join('');
+  return '<div class="box"><div class="box-title">'+title+'</div>'+rows+'</div>';
+}
+window.addEventListener('message',function(e){
+  if(e.data.type!=='LOG_DATA')return;
+  var d=e.data.payload;
+  var ts=d.timestamp?new Date(d.timestamp).toLocaleString('ko-KR'):'';
+  var mc=MC[d.method]||'';
+  var sc=SC(Number(d.status_code));
+  var sz=SZ(d.response_size_bytes);
+  document.getElementById('root').innerHTML=
+    '<div class="top">'+
+      '<span class="badge method '+mc+'">'+d.method+'</span>'+
+      '<span class="badge '+sc+'">'+d.status_code+'</span>'+
+      '<span class="path">'+d.path+'</span>'+
+      '<span class="meta">'+(d.duration_ms||0)+'ms'+(sz?' · '+sz:'')+'</span>'+
+      '<span class="meta" style="opacity:.5">'+ts+'</span>'+
+    '</div>'+
+    '<div class="grid">'+hdrs(d.request_headers,'요청 헤더')+hdrs(d.response_headers,'응답 헤더')+'</div>'+
+    (d.error?'<div style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:10px;font-size:12px"><b style="color:#f87171">'+d.error.code+'</b><br>'+d.error.message+'</div>':'');
+});
+</script>

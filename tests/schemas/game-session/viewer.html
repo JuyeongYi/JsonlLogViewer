@@ -1,0 +1,87 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0f1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:12px;font-size:13px}
+.header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+.badge{padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase}
+.lv-info{background:rgba(74,222,128,.15);color:#4ade80}
+.lv-warn{background:rgba(251,191,36,.15);color:#fbbf24}
+.lv-error{background:rgba(248,113,113,.15);color:#f87171}
+.lv-debug{background:rgba(148,163,184,.15);color:#94a3b8}
+.event{background:rgba(129,140,248,.15);color:#818cf8;padding:1px 7px;border-radius:4px;font-size:11px}
+.msg{font-weight:600;font-size:14px;flex:1}
+.ts{font-size:11px;color:#64748b}
+.sec{margin-bottom:12px}
+.sec-title{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:5px}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px}
+.kv-item{background:rgba(255,255,255,.04);border-radius:5px;padding:5px 8px}
+.kv-k{font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:1px}
+.kv-v{font-family:monospace;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:4px 8px;background:rgba(255,255,255,.06);color:#64748b;font-size:10px;text-transform:uppercase}
+td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.04)}
+.tag{display:inline-block;background:rgba(129,140,248,.15);color:#a5b4fc;border-radius:3px;padding:1px 6px;font-size:11px;margin:2px}
+.num{color:#93c5fd}
+.str{color:#86efac}
+.bool-t{color:#4ade80}
+.bool-f{color:#f87171}
+</style>
+<div id="root"></div>
+<script>
+var LC={'info':'lv-info','warn':'lv-warn','warning':'lv-warn','error':'lv-error','debug':'lv-debug'};
+var SKIP=new Set(['timestamp','level','msg','event_type','category','session_id']);
+function fv(v){
+  if(v===null||v===undefined)return '<span style="opacity:.3">—</span>';
+  if(typeof v==='boolean')return v?'<span class="bool-t">true</span>':'<span class="bool-f">false</span>';
+  if(typeof v==='number')return '<span class="num">'+v.toLocaleString()+'</span>';
+  if(typeof v==='string')return '<span class="str">'+v+'</span>';
+  if(Array.isArray(v))return '<span style="opacity:.5">['+v.length+'개]</span>';
+  return '<span style="opacity:.5">{…}</span>';
+}
+function tbl(arr){
+  if(!arr||!arr.length)return '';
+  var keys=[...new Set(arr.flatMap(function(r){return Object.keys(r)}))];
+  return '<table><thead><tr>'+keys.map(function(k){return '<th>'+k+'</th>'}).join('')+'</tr></thead><tbody>'+
+    arr.map(function(r){return '<tr>'+keys.map(function(k){return '<td>'+fv(r[k])+'</td>'}).join('')+'</tr>'}).join('')+
+    '</tbody></table>';
+}
+window.addEventListener('message',function(e){
+  if(e.data.type!=='LOG_DATA')return;
+  var d=e.data.payload;
+  var ts=d.timestamp?new Date(d.timestamp).toLocaleString('ko-KR'):'';
+  var lc=LC[String(d.level||'').toLowerCase()]||'lv-info';
+  var scalars=Object.entries(d).filter(function(p){return !SKIP.has(p[0])&&typeof p[1]!=='object'});
+  var arrays=Object.entries(d).filter(function(p){return Array.isArray(p[1])});
+  var objects=Object.entries(d).filter(function(p){return p[1]&&typeof p[1]==='object'&&!Array.isArray(p[1])});
+  var html=
+    '<div class="header">'+
+      '<span class="badge '+lc+'">'+d.level+'</span>'+
+      '<span class="event">'+d.event_type+'</span>'+
+      (d.category?'<span style="font-size:11px;opacity:.5">'+d.category+'</span>':'')+
+      (d.session_id?'<span style="font-size:11px;color:#818cf8;opacity:.7">#'+d.session_id+'</span>':'')+
+      '<span class="msg">'+d.msg+'</span>'+
+      '<span class="ts">'+ts+'</span>'+
+    '</div>';
+  if(scalars.length){
+    html+='<div class="sec"><div class="sec-title">기본 정보</div><div class="kv">'+
+      scalars.map(function(p){return '<div class="kv-item"><div class="kv-k">'+p[0]+'</div><div class="kv-v">'+fv(p[1])+'</div></div>'}).join('')+
+      '</div></div>';
+  }
+  objects.forEach(function(p){
+    html+='<div class="sec"><div class="sec-title">'+p[0]+'</div><div class="kv">'+
+      Object.entries(p[1]).map(function(e){return '<div class="kv-item"><div class="kv-k">'+e[0]+'</div><div class="kv-v">'+fv(e[1])+'</div></div>'}).join('')+
+      '</div></div>';
+  });
+  arrays.forEach(function(p){
+    var arr=p[1];
+    if(!arr.length)return;
+    html+='<div class="sec"><div class="sec-title">'+p[0]+'</div>';
+    if(typeof arr[0]==='string'){
+      html+=arr.map(function(s){return '<span class="tag">'+s+'</span>'}).join('');
+    } else {
+      html+=tbl(arr);
+    }
+    html+='</div>';
+  });
+  document.getElementById('root').innerHTML=html;
+});
+</script>

@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "required": ["timestamp", "level", "msg", "event_type", "session_id"],
+  "properties": {
+    "timestamp":  { "type": "string", "format": "date-time" },
+    "level":      { "type": "string", "enum": ["error","warn","info","debug"] },
+    "msg":        { "type": "string" },
+    "event_type": { "type": "string" },
+    "session_id": { "type": "string" },
+    "player_id":  { "type": "string" },
+    "map":        { "type": "string" },
+    "difficulty": { "type": "string", "enum": ["easy","normal","hard","extreme"] },
+    "duration_minutes": { "type": "number", "minimum": 0 },
+    "kills":  { "type": "integer", "minimum": 0 },
+    "deaths": { "type": "integer", "minimum": 0 },
+    "score":  { "type": "integer", "minimum": 0 },
+    "level_gained": { "type": "boolean" },
+    "hp_remaining": { "type": "number", "minimum": 0 },
+    "result": { "type": "string", "enum": ["victory","defeat","draw","disconnect"] },
+    "damage_dealt": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["skill", "damage"],
+        "properties": {
+          "skill":  { "type": "string" },
+          "hits":   { "type": "integer", "minimum": 0 },
+          "damage": { "type": "number", "minimum": 0 },
+          "crit":   { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "buffs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "rewards": {
+      "type": "object",
+      "properties": {
+        "gold":             { "type": "integer", "minimum": 0 },
+        "exp":              { "type": "integer", "minimum": 0 },
+        "bonus_multiplier": { "type": "number",  "minimum": 0 }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "ms", "budget_ms"],
+        "properties": {
+          "name":      { "type": "string" },
+          "ms":        { "type": "number", "minimum": 0 },
+          "budget_ms": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

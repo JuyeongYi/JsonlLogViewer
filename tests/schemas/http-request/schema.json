@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "required": ["timestamp", "level", "msg", "method", "path", "status_code"],
+  "properties": {
+    "timestamp":    { "type": "string", "format": "date-time" },
+    "level":        { "type": "string", "enum": ["error","warn","info","debug"] },
+    "msg":          { "type": "string" },
+    "method":       { "type": "string", "enum": ["GET","POST","PUT","DELETE","PATCH","HEAD","OPTIONS"] },
+    "path":         { "type": "string" },
+    "status_code":  { "type": "integer", "minimum": 100, "maximum": 599 },
+    "duration_ms":  { "type": "number" },
+    "response_size_bytes": { "type": "integer" },
+    "client_ip":    { "type": "string" },
+    "request_headers":  {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "response_headers": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code":    { "type": "string" },
+        "message": { "type": "string" },
+        "trace_id":{ "type": "string" }
+      }
+    },
+    "retry_after_seconds": { "type": "integer" },
+    "retried": { "type": "boolean" }
+  }
+}

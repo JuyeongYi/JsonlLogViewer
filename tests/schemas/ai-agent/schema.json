@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "required": ["timestamp", "level", "msg", "agent_id", "turn"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "level":     { "type": "string", "enum": ["error","warn","info","debug"] },
+    "msg":       { "type": "string" },
+    "agent_id":  { "type": "string" },
+    "turn":      { "type": "integer", "minimum": 0 },
+    "model":     { "type": "string" },
+    "thinking":  { "type": "string" },
+    "cost_usd":  { "type": "number", "minimum": 0 },
+    "token_usage": {
+      "type": "object",
+      "required": ["input", "output"],
+      "properties": {
+        "input":       { "type": "integer", "minimum": 0 },
+        "output":      { "type": "integer", "minimum": 0 },
+        "cache_read":  { "type": "integer", "minimum": 0 },
+        "cache_write": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name":   { "type": "string" },
+          "input":  {},
+          "result": {}
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "error": {
+      "type": "object",
+      "required": ["type", "message"],
+      "properties": {
+        "type":    { "type": "string" },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}

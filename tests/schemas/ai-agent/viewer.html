@@ -1,0 +1,89 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0f1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:12px;font-size:13px}
+.header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)}
+.turn{background:rgba(129,140,248,.2);color:#818cf8;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px}
+.agent{font-family:monospace;font-size:11px;opacity:.5}
+.msg{flex:1;font-weight:600}
+.ts{font-size:11px;color:#64748b}
+.lv{padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;text-transform:uppercase}
+.lv-info{background:rgba(74,222,128,.15);color:#4ade80}
+.lv-warn{background:rgba(251,191,36,.15);color:#fbbf24}
+.lv-error{background:rgba(248,113,113,.15);color:#f87171}
+.sec{margin-bottom:14px}
+.sec-title{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:6px}
+.tokens{display:flex;gap:10px;flex-wrap:wrap}
+.token-card{background:rgba(255,255,255,.05);border-radius:6px;padding:8px 12px;text-align:center;min-width:80px}
+.token-val{font-size:18px;font-weight:700;color:#93c5fd}
+.token-lbl{font-size:10px;color:#64748b;margin-top:2px}
+.tool-call{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.15);border-radius:6px;padding:8px 12px;margin-bottom:6px}
+.tool-name{color:#fbbf24;font-weight:700;font-family:monospace;margin-bottom:4px}
+.tool-args{font-family:monospace;font-size:11px;opacity:.7;white-space:pre-wrap;word-break:break-all}
+.tool-result{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.12);border-radius:4px;padding:6px 10px;margin-top:6px;font-family:monospace;font-size:11px;opacity:.8}
+.thinking{background:rgba(129,140,248,.07);border-left:3px solid #818cf8;padding:8px 12px;border-radius:0 6px 6px 0;font-style:italic;opacity:.8;font-size:12px;line-height:1.6}
+.progress{height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:4px}
+.progress-bar{height:8px;border-radius:4px;background:linear-gradient(90deg,#818cf8,#60a5fa)}
+.cost{font-size:11px;color:#fbbf24;font-family:monospace}
+</style>
+<div id="root"></div>
+<script>
+var LC={'info':'lv-info','warn':'lv-warn','error':'lv-error','debug':''};
+function safeJson(v){
+  try{return JSON.stringify(JSON.parse(v),null,2)}catch(e){return v}
+}
+window.addEventListener('message',function(e){
+  if(e.data.type!=='LOG_DATA')return;
+  var d=e.data.payload;
+  var ts=d.timestamp?new Date(d.timestamp).toLocaleString('ko-KR'):'';
+  var lc=LC[String(d.level||'').toLowerCase()]||'';
+  var html=
+    '<div class="header">'+
+      '<span class="turn">Turn '+d.turn+'</span>'+
+      (lc?'<span class="lv '+lc+'">'+d.level+'</span>':'')+
+      '<span class="agent">'+d.agent_id+'</span>'+
+      '<span class="msg">'+d.msg+'</span>'+
+      '<span class="ts">'+ts+'</span>'+
+    '</div>';
+  // Thinking
+  if(d.thinking){
+    html+='<div class="sec"><div class="sec-title">추론 과정</div>'+
+      '<div class="thinking">'+d.thinking+'</div></div>';
+  }
+  // Token usage
+  if(d.token_usage){
+    var u=d.token_usage;
+    var total=(u.input||0)+(u.output||0);
+    var pct=total>0?Math.round(((u.input||0)/total)*100):0;
+    html+='<div class="sec"><div class="sec-title">토큰 사용량'+
+      (d.cost_usd?'&nbsp;<span class="cost">($'+d.cost_usd.toFixed(4)+')</span>':'')+
+      '</div>'+
+      '<div class="tokens">'+
+        '<div class="token-card"><div class="token-val">'+(u.input||0).toLocaleString()+'</div><div class="token-lbl">Input</div></div>'+
+        '<div class="token-card"><div class="token-val">'+(u.output||0).toLocaleString()+'</div><div class="token-lbl">Output</div></div>'+
+        (u.cache_read?'<div class="token-card"><div class="token-val" style="color:#4ade80">'+u.cache_read.toLocaleString()+'</div><div class="token-lbl">캐시 적중</div></div>':'')+
+        (u.cache_write?'<div class="token-card"><div class="token-val" style="color:#fbbf24">'+u.cache_write.toLocaleString()+'</div><div class="token-lbl">캐시 저장</div></div>':'')+
+      '</div>'+
+      '<div style="margin-top:6px;font-size:10px;color:#64748b">Input 비율 '+pct+'%</div>'+
+      '<div class="progress"><div class="progress-bar" style="width:'+pct+'%"></div></div>'+
+      '</div>';
+  }
+  // Tool calls
+  if(d.tool_calls&&d.tool_calls.length){
+    html+='<div class="sec"><div class="sec-title">툴 호출 ('+d.tool_calls.length+'개)</div>';
+    d.tool_calls.forEach(function(tc){
+      html+='<div class="tool-call">'+
+        '<div class="tool-name">⚙ '+tc.name+'</div>'+
+        (tc.input?'<div class="tool-args">'+safeJson(typeof tc.input==='string'?tc.input:JSON.stringify(tc.input))+'</div>':'')+
+        (tc.result!==undefined?'<div class="tool-result">→ '+String(tc.result)+'</div>':'')+
+        '</div>';
+    });
+    html+='</div>';
+  }
+  // Error
+  if(d.error){
+    html+='<div class="sec"><div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:10px;font-size:12px">'+
+      '<b style="color:#f87171">'+d.error.type+'</b><br>'+d.error.message+'</div></div>';
+  }
+  document.getElementById('root').innerHTML=html;
+});
+</script>
