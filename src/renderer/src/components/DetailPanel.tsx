@@ -35,7 +35,10 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
   }
 
   // 세로 드래그 (패널 높이)
-  const [panelHeight, setPanelHeight] = useState(() => Math.floor(window.innerHeight / 2))
+  const [panelHeight, setPanelHeight] = useState(() => {
+    const saved = localStorage.getItem('detailPanelHeight')
+    return saved ? parseInt(saved, 10) : Math.floor(window.innerHeight / 2)
+  })
   const vDragRef = useRef<{ startY: number; startH: number } | null>(null)
 
   const onVDragStart = (e: React.MouseEvent) => {
@@ -44,15 +47,19 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
       'ns-resize',
       (ev) => {
         if (!vDragRef.current) return
-        const delta = vDragRef.current.startY - ev.clientY
-        setPanelHeight(Math.max(120, Math.min(window.innerHeight * 0.75, vDragRef.current.startH + delta)))
+        const next = Math.max(120, Math.min(window.innerHeight * 0.75, vDragRef.current.startH + (vDragRef.current.startY - ev.clientY)))
+        setPanelHeight(next)
+        localStorage.setItem('detailPanelHeight', String(next))
       },
       () => { vDragRef.current = null }
     )
   }
 
   // 가로 드래그 (뷰어|JSON 트리 너비)
-  const [jsonTreeWidth, setJsonTreeWidth] = useState(280)
+  const [jsonTreeWidth, setJsonTreeWidth] = useState(() => {
+    const saved = localStorage.getItem('jsonTreeWidth')
+    return saved ? parseInt(saved, 10) : 280
+  })
   const hDragRef = useRef<{ startX: number; startW: number } | null>(null)
 
   const onHDragStart = (e: React.MouseEvent) => {
@@ -62,8 +69,9 @@ export function DetailPanel({ row, schemas, onClose }: DetailPanelProps): React.
       'ew-resize',
       (ev) => {
         if (!hDragRef.current) return
-        const delta = hDragRef.current.startX - ev.clientX
-        setJsonTreeWidth(Math.max(100, Math.min(600, hDragRef.current.startW + delta)))
+        const next = Math.max(100, Math.min(600, hDragRef.current.startW + (hDragRef.current.startX - ev.clientX)))
+        setJsonTreeWidth(next)
+        localStorage.setItem('jsonTreeWidth', String(next))
       },
       () => { hDragRef.current = null }
     )
