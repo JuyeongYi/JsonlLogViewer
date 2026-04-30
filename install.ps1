@@ -1,14 +1,12 @@
 # JsonlLogViewer 빌드 스크립트
 #
 # 사용법:
-#   .\install.ps1              → 빌드 + 실행 파일 생성 (dist\win-unpacked\jllv.exe)
-#   .\install.ps1 -Installer   → 빌드 + NSIS 설치 파일(.exe) 생성
-#                                ※ Windows 개발자 모드 필요 (설정 → 개인 정보 및 보안 → 개발자용 → 개발자 모드 ON)
-#   .\install.ps1 -DevOnly     → 의존성 설치만
-#   .\install.ps1 -Run         → 개발 서버 실행
+#   .\install.ps1          → 빌드 + NSIS 설치 파일(.exe) 생성
+#                            ※ Windows 개발자 모드 필요 (설정 → 개인 정보 및 보안 → 개발자용 → 개발자 모드 ON)
+#   .\install.ps1 -DevOnly → 의존성 설치만
+#   .\install.ps1 -Run     → 개발 서버 실행
 
 param(
-    [switch]$Installer,
     [switch]$DevOnly,
     [switch]$Run
 )
@@ -48,36 +46,18 @@ if ($LASTEXITCODE -ne 0) { Write-Fail "빌드 실패" }
 Write-Ok "빌드 완료"
 
 # ── 패키징 ───────────────────────────────────────────────
-if ($Installer) {
-    # NSIS 설치 파일 — Windows 개발자 모드 필요
-    Write-Step "NSIS 설치 파일 생성"
-    Write-Warn "개발자 모드가 활성화되어 있어야 합니다."
-    Write-Warn "설정 → 개인 정보 및 보안 → 개발자용 → 개발자 모드 ON"
+# NSIS 설치 파일 생성 (개발자 모드 필요)
+Write-Step "설치 파일 생성 (NSIS .exe)"
+$env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
+npx electron-builder --win
+Remove-Item Env:\CSC_IDENTITY_AUTO_DISCOVERY -ErrorAction SilentlyContinue
 
-    $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
-    npx electron-builder --win
-    Remove-Item Env:\CSC_IDENTITY_AUTO_DISCOVERY -ErrorAction SilentlyContinue
+if ($LASTEXITCODE -ne 0) {
+    Write-Fail "패키징 실패 — Windows 개발자 모드를 활성화하고 재시도하세요`n  설정 → 개인 정보 및 보안 → 개발자용 → 개발자 모드 ON"
+}
 
-    if ($LASTEXITCODE -ne 0) { Write-Fail "패키징 실패 — 개발자 모드를 활성화하고 재시도하세요" }
-
-    $installer = Get-ChildItem "dist" -Filter "*-setup.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($installer) {
-        Write-Ok "설치 파일: dist\$($installer.Name)"
-        Write-Host "`n  ▶ dist\$($installer.Name)" -ForegroundColor Yellow
-    }
-} else {
-    # --dir: 코드 서명 없이 실행 파일만 생성 (개발자 모드 불필요)
-    Write-Step "실행 파일 생성 (서명·설치 파일 없음)"
-    $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
-    npx electron-builder --dir
-    Remove-Item Env:\CSC_IDENTITY_AUTO_DISCOVERY -ErrorAction SilentlyContinue
-
-    if ($LASTEXITCODE -ne 0) { Write-Fail "패키징 실패" }
-
-    $exe = Get-ChildItem "dist\win-unpacked" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($exe) {
-        Write-Ok "실행 파일: dist\win-unpacked\$($exe.Name)"
-        Write-Host "`n  ▶ dist\win-unpacked\$($exe.Name)" -ForegroundColor Yellow
-        Write-Host "  설치 파일 생성: .\install.ps1 -Installer  (개발자 모드 필요)" -ForegroundColor DarkGray
-    }
+$installer = Get-ChildItem "dist" -Filter "*-setup.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($installer) {
+    Write-Ok "설치 파일 생성 완료"
+    Write-Host "`n  ▶ dist\$($installer.Name)" -ForegroundColor Yellow
 }
