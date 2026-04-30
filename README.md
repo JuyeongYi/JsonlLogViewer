@@ -108,6 +108,36 @@ window.addEventListener('message', e => {
 
 ---
 
+## CLI (`jllv`)
+
+설치 후 터미널에서 `jllv` 명령어를 바로 사용할 수 있습니다.
+
+### 앱 열기
+
+```bash
+jllv                          # 앱 열기 (세션 복원)
+jllv open server.jsonl        # 파일 열기 (실시간 tail 기본)
+jllv open a.jsonl b.jsonl     # 여러 파일을 탭으로 열기
+jllv open server.jsonl --non-tail   # tail 비활성화
+jllv --help                   # 도움말
+```
+
+두 번째 실행 시 이미 열린 창에 탭으로 추가됩니다 (단일 인스턴스).
+
+### 스키마 관리 (headless — GUI 없음)
+
+```bash
+jllv schema --list                            # 등록된 스키마 목록 (JSON)
+jllv schema --view <id>                       # schema.json 내용 출력
+jllv schema --view <id> --html                # viewer.html 내용 출력
+jllv schema --add <id> <json파일> [html파일]  # 스키마 등록
+jllv schema --remove <id>                     # 스키마 삭제
+jllv schema --import schemas.zip              # ZIP에서 일괄 가져오기
+jllv schema --export out.zip                  # ZIP으로 내보내기
+```
+
+---
+
 ## 라이선스
 
 MIT
