@@ -31,16 +31,38 @@ jobs:
       - name: Build app
         run: npm run build
 
-      - name: Package installer
-        run: npx electron-builder --win --publish never --verbose
+      # ── Portable: 항상 성공 ──────────────────────────────
+      - name: Package portable (--dir)
+        run: npx electron-builder --dir
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-          DEBUG: 'electron-builder'
 
+      - name: Zip portable app
+        run: |
+          $tag = "${{ github.ref_name }}"
+          Compress-Archive -Path dist\win-unpacked\* `
+            -DestinationPath "dist\JsonlLogViewer-$tag-portable.zip"
+        shell: pwsh
+
+      # ── Installer: 실패해도 계속 ─────────────────────────
+      - name: Package installer (--win)
+        run: npx electron-builder --win --publish never
+        continue-on-error: true
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      # ── 결과물 목록 확인 ─────────────────────────────────
+      - name: List dist
+        run: Get-ChildItem dist -Filter "*.exe","*.zip" | Select-Object Name, Length
+        shell: pwsh
+
+      # ── 둘 다 업로드 (있는 것만) ─────────────────────────
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*-setup.exe
+          files: |
+            dist/*.zip
+            dist/*-setup.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
